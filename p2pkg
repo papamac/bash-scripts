@@ -1,0 +1,245 @@
+#!/bin/bash
+###############################################################################
+#
+#     PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
+#        FILE:  p2pkg
+#       TITLE:  papamac's personal package utility (p2pkg)
+#    FUNCTION:  Download, install, and remove papamac's packages.
+#       USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
+#               See p2pkg -h for more precise usage.
+#     OPTIONS:  See getopts comments in the script below.
+#      AUTHOR:  papamac
+#     VERSION:  1.0.1
+#        DATE:  December 31, 2019
+#
+#
+# MIT LICENSE:
+#
+# Copyright (c) 2019 David A. Krause, aka papamac
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# allcopies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#
+# DESCRIPTION:
+#
+# p2pkg downloads a package directory from either an ftp server (p2pkg -f
+# PACKAGE) or github (p2pkg -g PACKAGE) into the src sub-directory of the
+# current working directory.  The PACKAGE name is the only required positional
+# argument and is used to access the ftp or github server.  At least one option
+# (-f, -g, etc) is required or p2pkg will exit without any action.
+#
+# p2pkg optionally installs the package files (p2pkg -i PACKAGE), removes them
+# (p2pkg -r PACKAGE), or executes a package-unique option (p2pkg -o PACKAGE).
+# The -i, -r, and -o options source action scripts named install, remove, and
+# option which, if implemented, must reside in the package src directory.  The
+# -f, -g, -i, -r, and -o options are available individually or in many
+# combinations (e.g., p2pkg -fio PACKAGE).  Arguments can be passed to the
+# package-unique action scripts by selecting -I, -R, or -O followed by an
+# argument instead of simply using -i, -r, or -o.  Positional arguments
+# following the PACKAGE name are also available to action scripts.  They are
+# acccessed using the variables $1, $2, etc as if they were the only arguments.
+#
+# p2pkg -f PACKAGE                      # Download the PACKAGE directory from
+#                                         the ftp server into a sub-directory
+#                                         named package in the src directory of
+#                                         the current working directory.
+# p2pkg -fi PACKAGE                     # Download the PACKAGE directory from
+#                                         the ftp server and install it.
+# p2pkg -r PACKAGE                      # Remove PACKAGE files and directories
+#                                         from the current working directory.
+# cd /usr/local                         # Download the PACKAGE directory from
+# sudo -E p2pkg -gi PACKAGE               github and install it in /usr/local.
+# cd /usr/local                         # Remove PACKAGE files and directories
+# sudo -E p2pkg -r PACKAGE                from /usr/local.
+#
+#
+# DEPENDENCIES/LIMITATIONS:
+#
+# Since the p2pkg script is part of the bash-scripts package, it must be
+# bootstrapped by first installing it manually and then using the manually-
+# installed version to install the bash-scripts package.  Also, for production
+# use, p2pkg must be installed in a root-owned directory.  sudo will not
+# execute bash-scripts from a user directory even if thwe user directory is
+# included in the execttion PATH.
+#
+###############################################################################
+
+# Set xtrace option.
+
+if [[ $XTRACE ]]; then
+    set -x
+fi
+
+# Define local variables and functions.
+
+n=$'\e[0m'                              # Reset all attributes (normal).
+t=$'\e[1m'                              # Set character attribute to bright.
+r=$'\e[31m'                             # Set foreground color to red.
+g=$'\e[32m'                             # Set foreground color to green.
+y=$'\e[33m'                             # Set foreground color to yellow.
+w=$'\e[37m'                             # Set foreground color to white.
+script=${0##*/}                         # Script name.
+usage="\
+usage: [sudo -E] p2pkg [-h] | [[[-f] | [-F ftp_dir]] | [[-g] | [-G git_usr]]
+                       [[-i] | [-I install_arg]] [[-o] | [-O option_arg]]
+                       [[-r] | [-R remove_arg]]] package_name [argument]"
+
+function errmsg { echo "$r$t$script: $1$n" >&2; }
+function infomsg { echo "$script: $1"; }
+function echo_exit { echo; exit $1; }
+
+function ok_to_continue {
+    echo -n "$script: $1... ok to continue? [Y/n] "
+    read
+    if [[ $REPLY != 'Y' ]]; then
+        errmsg 'aborted'
+        echo_exit 1
+    fi
+}
+
+function source_action_script {         # Conditionally source package-unique
+    action=$1                           #   action bash-scripts.
+    if [[ $action ]]; then
+        if [[ -d $pkg ]]; then
+            action_script=$pkg/$action
+            if [[ -f $action_script ]]; then
+                source $action_script
+            else
+                errmsg "$action_script: file not found"
+                echo_exit 2
+            fi
+        else
+            errmsg "$pkg: directory not found"
+            echo_exit 3
+        fi
+    fi
+}
+
+# Parse options and set action variables.
+
+while getopts ':fF:gG:hiI:oO:rR:' opt; do
+    case $opt in
+        f) ftp=ftp ;;                   # Downowad the package directory from
+                                        #   the ftp server to the src directory
+                                        #   of the current working directory.
+        F) ftp=ftp                      # Same as f, but set the ftp_dir.
+           ftp_dir=$OPTARG ;;
+        g) git=git ;;                   # Download the package directory from
+                                        #   the github server to the src
+                                        #   directory of the current working
+                                        #   directory.
+        G) git=git                      # Same as g, but set the git_usr.
+           git_usr=$OPTARG ;;
+        h) echo "$usage"                # Help.
+           exit 0 ;;
+        i) install=install              # Execute the package install script
+           install_arg= ;;              #   without an argument.
+        I) install=install              # Same as i, but include the argument.
+           install_arg=$OPTARG ;;       # Argument is referenced by sourced
+                                        #   action bash-scripts.
+        o) option=option                # Execute the package option script
+           option_arg= ;;               #   without an argument.
+        O) option=option                # Same as o, but include the argument.
+           option_arg=$OPTARG ;;        # Argument is referenced by sourced
+                                        #   action bash-scripts.
+        r) remove=remove                # Execute the package remove script
+           remove_arg= ;;               #   without an argument.
+        R) remove=remove                # Same as r, but include the argument.
+           remove_arg=$OPTARG ;;        # Argument is referenced by sourced
+                                        #   action bash-scripts.
+        ?) errmsg "unrecognized option"
+           echo "$usage"
+           exit 4 ;;
+    esac
+done
+shift $(($OPTIND - 1))
+pkg_name=$1                             # Package name used by the ftp server
+                                        #   or the github server (may be
+                                        #   upper case).
+shift 1                                 # Reset argument numbering for the
+                                        #   action scripts.
+if [[ ! $pkg_name ]]; then
+    errmsg 'no package specified'
+    echo_exit 5
+fi
+if [[ ! $ftp$git$install$option$remove ]]; then
+    errmsg 'no options specified'
+    echo_exit 6
+fi
+
+# Verify operation in the current working directory.
+
+echo
+ok_to_continue "working in $y$t$PWD$n"
+
+# Define directory variables.
+
+bin=$PWD/bin                            # bin directory referenced by sourced
+                                        #   action_scripts.
+src=$PWD/src                            # src directory.
+pkg=$src/${pkg_name,,}                  # Name of the package source directory
+                                        #   using a lower case package name.
+
+# If remove was selected, do it first.
+
+source_action_script $remove
+
+# Optionally download files from either the ftp server or the github server.
+
+if [[ $ftp ]]; then
+    ftp_usr=${FTP_USR:-papamac}         # ftp account username.
+    ftp_pwd=${FTP_PWD:-papa2352}        # ftp account password.
+    ftp_url=${FTP_URL:-ftps://mac-pro.local:2121}  # ftp server URL.
+    ftp_dir=${FTP_DIR:-Software}        # ftp package directory.
+    wget_opts='-qrR .DS_Store -nH --cut-dirs=2 --check-certificate=quiet'
+    wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
+    exclude_list="$ftp_dir/$pkg_name/.*"
+    ftp_path=$ftp_url/$ftp_dir/$pkg_name
+    infomsg "downloading $y$t$ftp_path$n to $y$t$pkg$n"
+    wget $wget_opts -X $exclude_list -P $pkg $ftp_path
+    exit_status=$?
+    if [[ $exit_status != 0 ]]; then
+        errmsg "wget: $pkg_name: download error ($exit_status)"
+        rm -fr $pkg
+        echo_exit 7
+    fi
+    chown -R --reference=$PWD $src
+
+elif [[ $git ]]; then
+    rm -fr $pkg
+    git_usr=${GIT_USR:-papamac}         # github account username.
+    git_url=${GIT_URL:-https://github.com}  # github server URL.
+    git_path=$git_url/$git_usr
+    infomsg "downloading $y$t$git_path$n to $y$t$pkg$n"
+    git clone $git_path/$pkg_name $pkg
+    exit_status=$?
+    if [[ $exit_status != 0 ]]; then
+        errmsg "git: $pkg_name: download error ($exit_status)"
+        rm -fr $pkg
+        echo_exit 8
+    fi
+    rm -fr $pkg/.[!.]*
+    chown -R --reference=$PWD $src
+fi
+
+# Optionally execute install and option action bash-scripts in the correct order.
+
+source_action_script $install
+source_action_script $option
+echo_exit 0
