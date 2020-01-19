@@ -2,8 +2,7 @@ Raspberry Pi Configuration Recipe
 ==================================
 ####Raspbian Buster (Raspbian built on Debian Buster)
 
-####December 5, 2019
-
+####January 12, 2020
 
 Install and configure Raspbian Buster:
 -----------------------------------------------------------------------------------
@@ -47,10 +46,11 @@ If the above update fails to complete successfully, click Back and start it agai
  * Click Shutdown in the Applications menu and then Reboot.
 
 5. Setup the pi desktop:
- * Right-click on the menu bar and then click Panel Settings. 
- * Move the panel to the bottom of the screen.
- * Select Panel Applets, Application Launch Bar, and then Preferences.
- * Configure the application launch bar as follows: (1) File Manager, (2) Terminal, (3) Task Manager (4) VNC Viewer, (5) Web Browser, (6) Text Editor, (7) PDF Viewer, (8) Mathematica, (9) Wolfram, (10) Thonny Python IDE, and (11) mu.
+ * Right-click on the menu bar and then select Panel Preferences. 
+ * Click Bottom to move the panel to the bottom of the screen.
+ * Select Panel Applets and then click Add/Remove/Up/Down to configure the following applets: (1) Menu, (2) System Tray, (3) Application Launch Bar, (4) Spacer - 5, (5) Task Bar - stretch, (6) Ejecter, (7) Bluetooth, (8) Wireless & Wired Network, (9) Volume Control, (10) CPU Usage Monitor, (11) CPU Temperature Monitor, (12) CPUFreq frontend, and (13) Digital Clock.
+ * Select CPU Usage Monitor/Preferences and then click Show usage as percentage.
+ * Select Application Launch Bar/Preferences and then click Add/Remove/Up/Down to configure the application launch bar as follows: (1) File Manager, (2) Task Manager, (3) Terminal (4) VNC Viewer, (5) Web Browser, (6) Text Editor, (7) PDF Viewer, (8) Mathematica, (9) Wolfram, (10) Thonny Python IDE, and (11) mu.
  * Close the Application Launch Bar and Panel Preferences windows.
  * Move the Trash to the lower right of the desktop.
  * From the main menu select Preferences, Appearance Settings, Desktop and then select a new desktop photo.
@@ -60,7 +60,7 @@ If the above update fails to complete successfully, click Back and start it agai
  * In the System tab click in the Hostname box and set the Hostname for this Raspberry Pi.
  * Moving to the Interfaces tab, select Enabled for all interfaces except the Serial Console which should be Disabled.
  * Click OK and then Yes to reboot and apply the settings.
- * Right-click on the VNC icon on the right side of the panel and click Options.
+ * Right-click on the leftmost VNC icon in the panel and click Options.
  * Click Expert and scroll to the IdleTimeout parameter.
  * Set IdleTimeout to 0 and click Apply.
  * Click OK to close the VNC Server Options window.
@@ -70,7 +70,7 @@ If the above update fails to complete successfully, click Back and start it agai
  * **sudo raspi-config**
  * Use the down arrow to select 7 Advanced Options and press Return.
  * Use the down arrow to select A5 Resolution and press Return.
- * Use the up/down arrows to select DMT Mode 82 1920x1080 60 Hz 16:9 and press Return.
+ * Use the up/down arrows to select CEA Mode 16 1920x1080 60 Hz 16:9 and press Return.
  * Press Return again to acknowledge the resolution setting.
  * Click the right arrow twice to select Finish and press Return.
  * Press Return again to reboot.
@@ -179,7 +179,8 @@ MCP4822    |2-Channel 12-Bit D/A Converter                     |db#
 2. Clone the github PiDACS repository, install pidacs in /usr/local, and install/start the pidacs server daemon:
  * Open a terminal window.
  * **c /usr/local**
- * **sudo p2pkg -giO 'port_names' PiDACS**
+ * **sudo p2pkg -g papamaclib**
+ * **sudo p2pkg -gio PiDACS port1 port2... portn**
  
 3. Reboot if desired to test system startup.
  * **reboot**
@@ -192,12 +193,12 @@ Optionally install ser2sock:
  * Reply Y to complete the installation.
  * **sudo apt-get autoremove**
  * Reply Y to complete the operation.
- * **c /usr/local/src**
+ * **c /usr/local**
  * **export GIT_USR=nutechsoftware**
- * **sudo -E p2pkg -g ser2sock**
+ * **sudo p2pkg -g ser2sock**
 
 2. Build and install ser2sock:
- * **c ser2sock**
+ * **c src/ser2sock**
  * **sudo ./configure**
  * **sudo make**
  * **sudo cp ser2sock /usr/local/bin**

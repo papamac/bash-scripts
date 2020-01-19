@@ -1,20 +1,20 @@
 ###############################################################################
 #
-#     PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
-#        FILE:  remove
-#       TITLE:  Remove the bash-scripts package
-#    FUNCTION:  Restore system files to their state before any installations
-#               by the install or option bash-scripts.
-#       USAGE:  source src/bash-scripts/remove or p2pkg -r bash-scripts (see
-#               examples below).
-#      AUTHOR:  papamac
-#     VERSION:  1.0.1
-#        DATE:  December 31, 2019
+#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
+#     FILE:  remove
+#    TITLE:  Remove the bash-scripts package (remove)
+# FUNCTION:  Restore system files to their state before any installations by
+#            the install or option bash-scripts.
+#    USAGE:  source src/bash-scripts/remove or p2pkg -r bash-scripts (see
+#            examples below).
+#   AUTHOR:  papamac
+#  VERSION:  1.0.3
+#     DATE:  January 19, 2020
 #
 #
 # MIT LICENSE:
 #
-# Copyright (c) 2019 David A. Krause, aka papamac
+# Copyright (c) 2019-2020 David A. Krause, aka papamac
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,12 +43,12 @@
 #
 # remove is designed to be used with p2pkg.  Usage examples are as follows:
 #
-# sudo -E p2pkg -r bash-scripts         # Remove the bash-scripts package from
+# sudo p2pkg -r bash-scripts            # Remove the bash-scripts package from
 #                                         the HOME and current working
 #                                         directories and restore
 #                                         /etc/netatalk/afp.conf.
 # cd /usr/local                         # Remove the bash-scripts package from
-# sudo -E p2pkg -r bash-scripts           the HOME and /usr/local directories
+# sudo p2pkg -r bash-scripts              the HOME and /usr/local directories
 #                                         and restore /etc/netatalk/afp.conf.
 #
 #
@@ -71,13 +71,13 @@ fi
 
 # Remove home file and directories.
 
-infomsg "remove: removing home files and directories from $y$t$HOME$n"
+infomsg "$g${t}remove:$n removing home files and directories from $b$t$HOME$n"
 rm ~/.bash_aliases
 rmdir --ignore-fail-on-non-empty ~/bin
 
 # Remove bash-scripts files and directories from the current working directory.
 
-infomsg "remove: removing bash-scripts files and directories from $y$t$PWD$n"
+infomsg "$g${t}remove:$n removing bash-scripts files and directories from $b$t$PWD$n"
 rm $bin/p2pkg
 rm -r $pkg
 
@@ -85,6 +85,6 @@ rm -r $pkg
 
 net=/etc/netatalk
 if [[ ! -f $net/afp.conf.save ]]; then
-    infomsg "restoring afp.conf in $y$t$net$n"
+    infomsg "$g${t}remove:$n restoring afp.conf in $b$t$net$n"
     mv -T $net/afp.conf.save $net/afp.conf
 fi

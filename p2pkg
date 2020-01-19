@@ -1,21 +1,21 @@
 #!/bin/bash
 ###############################################################################
 #
-#     PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
-#        FILE:  p2pkg
-#       TITLE:  papamac's personal package utility (p2pkg)
-#    FUNCTION:  Download, install, and remove papamac's packages.
-#       USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
-#               See p2pkg -h for more precise usage.
-#     OPTIONS:  See getopts comments in the script below.
-#      AUTHOR:  papamac
-#     VERSION:  1.0.1
-#        DATE:  December 31, 2019
+#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
+#     FILE:  p2pkg
+#    TITLE:  papamac's personal package utility (p2pkg)
+# FUNCTION:  Download, install, and remove papamac's packages.
+#    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
+#            See p2pkg -h for more precise usage.
+#  OPTIONS:  See getopts comments in the script below.
+#   AUTHOR:  papamac
+#  VERSION:  1.0.4
+#     DATE:  January 19, 2020
 #
 #
 # MIT LICENSE:
 #
-# Copyright (c) 2019 David A. Krause, aka papamac
+# Copyright (c) 2019-2020 David A. Krause, aka papamac
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -49,11 +49,16 @@
 # The -i, -r, and -o options source action scripts named install, remove, and
 # option which, if implemented, must reside in the package src directory.  The
 # -f, -g, -i, -r, and -o options are available individually or in many
-# combinations (e.g., p2pkg -fio PACKAGE).  Arguments can be passed to the
-# package-unique action scripts by selecting -I, -R, or -O followed by an
-# argument instead of simply using -i, -r, or -o.  Positional arguments
-# following the PACKAGE name are also available to action scripts.  They are
-# acccessed using the variables $1, $2, etc as if they were the only arguments.
+# combinations (e.g., p2pkg -fio PACKAGE).
+#
+# Arguments can be passed to the package-unique action scripts by selecting -I,
+# -R, or -O followed by an argument instead of simply using -i, -r, or -o.
+# These arguments are passed to the action scripts via the variables
+# install_arg, remove_arg, and option_arg respectively.  Any positional
+# arguments following the PACKAGE name are also available to the action
+# scripts.  p2pkg sets two variables to capture these: arg is set to the first
+# positional argument following the PACKAGE name ($1) and args is set to all
+# of the positional arguments following the PACKAGE name ($*).
 #
 # p2pkg -f PACKAGE                      # Download the PACKAGE directory from
 #                                         the ftp server into a sub-directory
@@ -64,9 +69,10 @@
 # p2pkg -r PACKAGE                      # Remove PACKAGE files and directories
 #                                         from the current working directory.
 # cd /usr/local                         # Download the PACKAGE directory from
-# sudo -E p2pkg -gi PACKAGE               github and install it in /usr/local.
+# sudo p2pkg -gi PACKAGE                  github and install it in /usr/local.
+#
 # cd /usr/local                         # Remove PACKAGE files and directories
-# sudo -E p2pkg -r PACKAGE                from /usr/local.
+# sudo p2pkg -r PACKAGE                   from /usr/local.
 #
 #
 # DEPENDENCIES/LIMITATIONS:
@@ -98,14 +104,14 @@ script=${0##*/}                         # Script name.
 usage="\
 usage: [sudo -E] p2pkg [-h] | [[[-f] | [-F ftp_dir]] | [[-g] | [-G git_usr]]
                        [[-i] | [-I install_arg]] [[-o] | [-O option_arg]]
-                       [[-r] | [-R remove_arg]]] package_name [argument]"
+                       [[-r] | [-R remove_arg]]] package_name [argument...]"
 
 function errmsg { echo "$r$t$script: $1$n" >&2; }
-function infomsg { echo "$script: $1"; }
+function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit $1; }
 
 function ok_to_continue {
-    echo -n "$script: $1... ok to continue? [Y/n] "
+    echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
     read
     if [[ $REPLY != 'Y' ]]; then
         errmsg 'aborted'
@@ -114,7 +120,7 @@ function ok_to_continue {
 }
 
 function source_action_script {         # Conditionally source package-unique
-    action=$1                           #   action bash-scripts.
+    action=$1                           # action bash-scripts.
     if [[ $action ]]; then
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
@@ -136,33 +142,30 @@ function source_action_script {         # Conditionally source package-unique
 while getopts ':fF:gG:hiI:oO:rR:' opt; do
     case $opt in
         f) ftp=ftp ;;                   # Downowad the package directory from
-                                        #   the ftp server to the src directory
-                                        #   of the current working directory.
+#                                         the ftp server to the src directory
+#                                         of the current working directory.
         F) ftp=ftp                      # Same as f, but set the ftp_dir.
            ftp_dir=$OPTARG ;;
         g) git=git ;;                   # Download the package directory from
-                                        #   the github server to the src
-                                        #   directory of the current working
-                                        #   directory.
+#                                         the github server to the src
+#                                         directory of the current working
+#                                         directory.
         G) git=git                      # Same as g, but set the git_usr.
            git_usr=$OPTARG ;;
         h) echo "$usage"                # Help.
            exit 0 ;;
-        i) install=install              # Execute the package install script
-           install_arg= ;;              #   without an argument.
-        I) install=install              # Same as i, but include the argument.
-           install_arg=$OPTARG ;;       # Argument is referenced by sourced
-                                        #   action bash-scripts.
-        o) option=option                # Execute the package option script
-           option_arg= ;;               #   without an argument.
-        O) option=option                # Same as o, but include the argument.
-           option_arg=$OPTARG ;;        # Argument is referenced by sourced
-                                        #   action bash-scripts.
-        r) remove=remove                # Execute the package remove script
-           remove_arg= ;;               #   without an argument.
-        R) remove=remove                # Same as r, but include the argument.
-           remove_arg=$OPTARG ;;        # Argument is referenced by sourced
-                                        #   action bash-scripts.
+        i) install=install              # Execute the package install script.
+           install_arg= ;;
+        I) install=install              # Same as i, but include an argument.
+           install_arg=$OPTARG ;;
+        o) option=option                # Execute the package option script.
+           option_arg= ;;
+        O) option=option                # Same as o, but include an argument.
+           option_arg=$OPTARG ;;
+        r) remove=remove                # Execute the package remove script.
+           remove_arg= ;;
+        R) remove=remove                # Same as r, but include sn argument.
+           remove_arg=$OPTARG ;;
         ?) errmsg "unrecognized option"
            echo "$usage"
            exit 4 ;;
@@ -170,10 +173,13 @@ while getopts ':fF:gG:hiI:oO:rR:' opt; do
 done
 shift $(($OPTIND - 1))
 pkg_name=$1                             # Package name used by the ftp server
-                                        #   or the github server (may be
-                                        #   upper case).
+#                                         or the github server (may be upper
+#                                         case).
 shift 1                                 # Reset argument numbering for the
-                                        #   action scripts.
+#                                         action scripts.
+arg=$1
+args=$*
+
 if [[ ! $pkg_name ]]; then
     errmsg 'no package specified'
     echo_exit 5
@@ -186,15 +192,15 @@ fi
 # Verify operation in the current working directory.
 
 echo
-ok_to_continue "working in $y$t$PWD$n"
+ok_to_continue "working in $b$t$PWD$n"
 
 # Define directory variables.
 
 bin=$PWD/bin                            # bin directory referenced by sourced
-                                        #   action_scripts.
+#                                         action_scripts.
 src=$PWD/src                            # src directory.
 pkg=$src/${pkg_name,,}                  # Name of the package source directory
-                                        #   using a lower case package name.
+#                                         using a lower case package name.
 
 # If remove was selected, do it first.
 
@@ -211,7 +217,7 @@ if [[ $ftp ]]; then
     wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
     exclude_list="$ftp_dir/$pkg_name/.*"
     ftp_path=$ftp_url/$ftp_dir/$pkg_name
-    infomsg "downloading $y$t$ftp_path$n to $y$t$pkg$n"
+    infomsg "downloading $b$t$ftp_path$n to $b$t$pkg$n"
     wget $wget_opts -X $exclude_list -P $pkg $ftp_path
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
@@ -226,7 +232,7 @@ elif [[ $git ]]; then
     git_usr=${GIT_USR:-papamac}         # github account username.
     git_url=${GIT_URL:-https://github.com}  # github server URL.
     git_path=$git_url/$git_usr
-    infomsg "downloading $y$t$git_path$n to $y$t$pkg$n"
+    infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
     git clone $git_path/$pkg_name $pkg
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
