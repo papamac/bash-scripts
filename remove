@@ -8,8 +8,8 @@
 #    USAGE:  source src/bash-scripts/remove or p2pkg -r bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.3
-#     DATE:  January 19, 2020
+#  VERSION:  1.0.4
+#     DATE:  January 20, 2020
 #
 #
 # MIT LICENSE:
@@ -84,7 +84,7 @@ rm -r $pkg
 # Restore afp.conf if it was changed from the original file.
 
 net=/etc/netatalk
-if [[ ! -f $net/afp.conf.save ]]; then
+if [[ -f $net/afp.conf.save ]]; then
     infomsg "$g${t}remove:$n restoring afp.conf in $b$t$net$n"
     mv -T $net/afp.conf.save $net/afp.conf
 fi
