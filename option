@@ -2,14 +2,16 @@
 #
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
 #     FILE:  option
-#    TITLE:  Optionally install the bash-scripts afp.conf file (option)
-# FUNCTION:  Install papamac's afp.conf file to support the netatalk daemon on
-#            Raspbian.
+#    TITLE:  Install optional bash-scripts files on Raspbian systems (option)
+# FUNCTION:  (1) install papamac's afp.conf file for the netatalk daemon, and
+#            (2) install the pigpio server daemon in /etc/init.d, link it for
+#            automatic startup on reboot, and start it in the current boot
+#            session.
 #    USAGE:  source src/bash-scripts/option or p2pkg -o bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.2
-#     DATE:  January 2, 2020
+#  VERSION:  1.0.3
+#     DATE:  April 2, 2020
 #
 #
 # MIT LICENSE:
@@ -37,49 +39,86 @@
 #
 # DESCRIPTION:
 #
+# The option script installs optional files to run the netatalk and pigpio
+# daemons on Raspbian systems.  These installations are sequestered into the
+# option script (vs. being included in install) because they are omly
+# applicable to Raspbian.  Do not use this script for a Mac OS installations.
+#
+# The bash-scripts package must be downloaded and installed before using
+# option.  Before starting, option checks for this and aborts on failure.
+#
 # The Apple File Protocol (AFP) is implemented by the netatalk daemon in
 # Raspbian.  The netatalk configuration is specified by the afp.conf file in
 # the /etc/netatalk directory.  papamac's afp.conf is included in the bash-
-# scripts package for convenience, but it is only applicable to Raspbian and
-# NOT to Mac OS.  Hence, the installation of afp.conf is performed in this
-# option script and not in the install script.  option should not be executed
-# for a Mac OS installation.  Also note that the netatalk package must be
-# installed in Raspbian before running the option script.
+# scripts package that has already been downloaded to the src sub-directory of
+# the current working directory.  Option copies this file to /etc/netatalk
+# after saving the original file so that the original file can be restored by
+# the remove script.
 #
-# option installs the bash-scripts/afp.conf file that has already been
-# downloaded to the src sub-directory of the current working directory.  It
-# first saves the existing /etc/netatalk/afp.conf to afp.conf.save, but only if
-# there is no existing .save file.  Thus only the original afp.conf is saved.
-# The saved file is available to be restored by the remove script.  After
-# saving the original afp.conf file, option completes the installation by
-# copying PWD/src/bash-scripts/afp.conf to /etc/netatalk.
+# pigpio is a library for the Raspberry Pi written by Ben Nuttall to control
+# the Pi 's General Purpose Input Output (GPIO) capabilities.  The pigpio
+# library is implemented in a server utility that runs as a daemon
+# (/usr/bin/pigpiod).  The bash-scripts pigpiod script statuses, starts, stops,
+# and restarts the pigpio server daemon using the standard start-stop-daemon
+# script.  option installs this script in /etc/init.d allowing the system
+# initialization daemon to start/stop the pigpio server daemon during system
+# startup/shutdown.  It also links the links the script for automatic startup
+# on reboot and restarts the daemon to activate it in the current boot session.
 #
 # option is designed to be used with p2pkg.  This can be done as part of a
-# complete install (Raspbian only) or separately.  Usage examples are as
-# follows:
+# complete installation or separately.  Usage examples are as follows:
 #
-# sudo -E p2pkg -fio bash-scripts       # Download the bash-scripts package
-#                                         from the ftp server and install it in
-#                                         the HOME and current working
-#                                         directories.  Additionally, install
-#                                         afp.conf in /etc/netatalk.
-# sudo p2pkg -fo bash-scripts           # Download the bash-scripts package
-#                                         from the ftp server and install only
-#                                         afp.conf.
-# sudo p2pkg -o bash-scripts            # Install afp.conf from the existing
-#                                         PWD/src/bash-scripts directory.
+# sudo -E p2pkg -gio bash-scripts       # Download the bash-scripts package
+#                                         from github and install it in the
+#                                         HOME and current working directories.
+#                                         Additionally, install afp.conf and
+#                                         pigpiod.
+# sudo p2pkg -go bash-scripts           # Download the bash-scripts package
+#                                         from github and install only afp.conf
+#                                         and pigpiod.
+# sudo p2pkg -o bash-scripts            # Install afp.conf and pigpiod from the
+#                                         existing PWD/src/bash-scripts
+#                                         directory.
 #
 #
 # DEPENDENCIES/LIMITATIONS:
 #
-# Because it changes files and directories owned by root, p2pkg -o must be
-# executed using sudo.
+# Before running option, netatalk must be installed using apt-get.  Also,
+# option must be run using sudo because it copies files into the root-owned
+# directories.
 #
 ###############################################################################
 
+# Ensure that the bash-scripts package has been downloaded and installed.
+
+if [[ ! -f $bin/pigpiod ]]; then
+    errmsg "option: $pkg_name not installed; option aborted"
+    echo_exit 1
+fi
+
 net=/etc/netatalk
-infomsg "$g${t}option:$n installing afp.conf in $b$t$net$n"
+
+# Save the original afp.config file from the netatalk installation and install
+# the new file from bash-scripts.
+
+infomsg "$g${t}option:$n installing $b${t}afp.conf$n in $b$t$net$n"
 if [[ ! -f $net/afp.conf.save ]]; then
     mv $net/afp.conf $net/afp.conf.save
 fi
 cp $pkg/afp.conf $net
+
+daemon_name=pigpiod
+daemon_file=/etc/init.d/$daemon_name
+
+# Copy the pigpiod script from src/bash-scripts to /etc/init.d.  Link the
+# script for automatic startup on reboot.
+
+infomsg "$g${t}option:$n installing daemon $y$t$daemon_name$n"
+cp $pkg/pigpiod $daemon_file
+update-rc.d $daemon_name defaults
+
+# Restart the daemon to activate it in the current boot session.
+
+$daemon_file restart
+exit_status=$?
+

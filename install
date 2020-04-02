@@ -8,8 +8,8 @@
 #    USAGE:  source src/bash-scripts/install or p2pkg -i bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.3
-#     DATE:  January 19, 2020
+#  VERSION:  1.0.4
+#     DATE:  March 29, 2020
 #
 #
 # MIT LICENSE:
@@ -40,9 +40,10 @@
 # The install script installs bash-scripts package files that have already been
 # downloaded to the src sub-directory of the current working directory.
 # Specifically, it copies src/bash-scripts/bash_aliases to .bash_aliases in the
-# HOME directory; it marks the src/bash-scripts/p2pkg file as executable; and
-# it creates a symbolic link to p2pkg in the bin sub-directory of the current
-# working directory.  Additionally, install creates HOME/bin if none exists.
+# HOME directory; it marks the src/bash-scripts/p2pkg and pigpiod files as
+# executable; and it creates symbolic links to p2pkg and pigpiod in the bin
+# sub-directory of the current working directory.  Additionally, install
+# creates HOME/bin if none exists.
 #
 # install is designed to be used with p2pkg.  Normally, the bash-scripts
 # package is downloaded to the current working directory using ftp (-f) or git
@@ -81,10 +82,11 @@ cp $pkg/bash_aliases ~/.bash_aliases
 mkdir -p ~/bin
 chown --reference=$HOME ~/bin ~/.bash_aliases
 
-# Install p2pkg script.
+# Install p2pkg and pigpiod scripts.
 
-infomsg "$g${t}install:$n installing p2pkg in $b$t$bin$n"
-chmod +x $pkg/p2pkg
+infomsg "$g${t}install:$n installing p2pkg and pigpiod in $b$t$bin$n"
+chmod +x $pkg/p2pkg $pkg/pigpiod
 mkdir -p $bin
 ln -fs $pkg/p2pkg $bin
+ln -fs $pkg/pigpiod $bin
 chown -R --reference=$PWD $bin
