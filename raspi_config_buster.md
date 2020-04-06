@@ -2,7 +2,7 @@ Raspberry Pi Configuration Recipe
 ==================================
 ####Raspbian Buster (Raspbian built on Debian Buster)
 
-####March 16, 2020
+####April 5, 2020
 
 Install and configure Raspbian Buster:
 -----------------------------------------------------------------------------------
@@ -97,11 +97,15 @@ Configure local options:
  
 2. Install optional Python packages:
  * **sudo pip3 install adafruit-circuitpython-ssd1306**
-
-3. Give the user pi permission to administer printers and faxes:
+ 
+3. Enable and start the pigpio server daemon (pigpiod):
+ * **sudo systemctl enable pigpiod**
+ * **sudo systemctl start pigpiod**
+ 
+4. Give the user pi permission to administer printers and faxes:
  * **sudo usermod -aG lpadmin pi**
  
-4. Install the bash-scripts package, including papamac's bash aliases, scripts, and the netatalk afp.config file.
+5. Install the bash-scripts package, including papamac's bash aliases, scripts, and the netatalk afp.config file.
  * **git clone https://github.com/papamac/bash-scripts**
  * **chmod +x bash-scripts/p2pkg**
  * **cd /usr/local**
@@ -110,7 +114,7 @@ Configure local options:
  * **sudo rm -r ~/bash-scripts**
  * **reboot**
 
-5. Install an optional software PACKAGE into ~/src and ~/bin:
+6. Install an optional software PACKAGE into ~/src and ~/bin:
  * Open a terminal window in the pi home directory.
  * **p2pkg -fi PACKAGE**
  
@@ -171,6 +175,19 @@ Optionally install messagesocket:
  
 3. Download and install the messagesocket package:
  * **sudo p2pkg -gi messagesocket**
+
+Optionally install scale:
+-----------------------------------------------------------------------------------
+
+1. Select the /usr/local directory for the installation:
+ * Open a terminal window.
+ * **c /usr/local**
+
+2. If not done previously, download the papamaclib package from github:
+ * **sudo p2pkg -g papamaclib**
+ 
+3. Download and install the scale package:
+ * **sudo p2pkg -gio scale**
 
 Optionally install PiDACS:
 -----------------------------------------------------------------------------------
