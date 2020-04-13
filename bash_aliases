@@ -7,8 +7,8 @@
 #            functions for general use.
 #    USAGE:  Installed in the home directory as the file .bash_aliases.
 #   AUTHOR:  papamac
-#  VERSION:  1.0.3
-#     DATE:  January 19, 2020
+#  VERSION:  1.0.4
+#     DATE:  April 13, 2020
 #
 #
 # MIT LICENSE:
@@ -23,7 +23,7 @@
 # furnished to do so, subject to the following conditions:
 #
 # The above copyright notice and this permission notice shall be included in
-# allcopies or substantial portions of the Software.
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -49,6 +49,11 @@
 # ENVIRONMENT VARIABLES
 #
 ###############################################################################
+
+# Color usage in ls -l for Mac OS BSD:
+
+export CLICOLOR=1
+export LSCOLORS=ExGxFxFxCxegedabagaced
 
 # ANSI escape sequences:
 
