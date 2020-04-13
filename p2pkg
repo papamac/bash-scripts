@@ -1,16 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 #
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
 #     FILE:  p2pkg
 #    TITLE:  papamac's personal package utility (p2pkg)
-# FUNCTION:  Download, install, and remove papamac's packages.
+# FUNCTION:  Copy, download, install, and remove papamac's packages.
 #    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
 #            See p2pkg -h for more precise usage.
 #  OPTIONS:  See getopts comments in the script below.
 #   AUTHOR:  papamac
-#  VERSION:  1.0.5
-#     DATE:  March 30, 2020
+#  VERSION:  1.0.7
+#     DATE:  April 13, 2020
 #
 #
 # MIT LICENSE:
@@ -38,20 +38,31 @@
 #
 # DESCRIPTION:
 #
-# p2pkg downloads a package directory from either an ftp server (p2pkg -f
-# PACKAGE) or github (p2pkg -g PACKAGE) into the src sub-directory of the
-# current working directory.  The PACKAGE name is the only required positional
-# argument and is used to access the ftp or github server.  At least one option
-# (-f, -g, etc) is required or p2pkg will exit without any action.
+# p2pkg optionally copies a package from a local library (p2pkg -c PACKAGE),
+# downloads a package from an ftp server (p2pkg -f PACKAGE), or downloads a
+# package from github (p2pkg -g PACKAGE).  It loads the package into the src
+# sub-directory of the current working directory.  The package name is the only
+# required positional argument and is used to access the package from the local
+# library, the ftp server, or github.
 #
-# p2pkg optionally installs the package files (p2pkg -i PACKAGE), removes them
-# (p2pkg -r PACKAGE), or executes a package-unique option (p2pkg -o PACKAGE).
-# The -i, -r, and -o options source action scripts named install, remove, and
-# option which, if implemented, must reside in the package src directory.  The
-# -f, -g, -i, -r, and -o options are available individually or in many
-# combinations (e.g., p2pkg -fio PACKAGE).
+# p2pkg optionally installs previously loaded package files (p2pkg -i PACKAGE),
+# removes them (p2pkg -r PACKAGE), or executes a package-unique option (p2pkg
+# -o PACKAGE).  The -i, -r, and -o options source action scripts named install,
+# remove, and option which, if implemented, must reside in the package src
+# directory.
 #
-# Arguments can be passed to the package-unique action scripts by selecting -I,
+# The -c, -f, and -g options are mutually exclusive.  The -i, -o, and -r
+# options may be selected individually (e.g., p2pkg -i PACKAGE) or combined
+# with -c, -f, or -g  (e.g., p2pkg -fio PACKAGE).  If -i, -o, and -r options
+# are selected individually they will operate on an existing package that has
+# already been loaded by p2pkg.  If a combination of options is specified, -r
+# is executed first, then -c, -f, or , -g, and finally -i and -o.
+#
+# Note thet the package loading options (-c, -f, -g) overwrite an existing
+# package in the current working directory, so that there is no need to remove
+# a package before re-installing it.
+#
+# Arguments may be passed to the package-unique action scripts by selecting -I,
 # -R, or -O followed by an argument instead of simply using -i, -r, or -o.
 # These arguments are passed to the action scripts via the variables
 # install_arg, remove_arg, and option_arg respectively.  Any positional
@@ -120,8 +131,13 @@ function ok_to_continue {
     fi
 }
 
+function chown_to_ref {                 # Change the owner:group of the targets
+    declare -a lsd=($(ls -ld $1))       # ($2-$6) to that of the reference ($1)
+    chown -R ${lsd[2]}:${lsd[3]} $2 $3 $4 $5 $6
+}
+
 function source_action_script {         # Conditionally source package-unique
-    action=$1                           # action bash-scripts.
+    action=$1                           # action scripts.
     if [[ $action ]]; then
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
@@ -140,8 +156,13 @@ function source_action_script {         # Conditionally source package-unique
 
 # Parse options and set action variables.
 
-while getopts ':fF:gG:hiI:oO:rR:' opt; do
+while getopts ':cC:fF:gG:hiI:oO:rR:' opt; do
     case $opt in
+        c) cpy=cpy ;;                   # Copy the package directory from a
+#                                         local library to the src directory
+#                                         of the current working directory.
+        C) cpy=cpy                      # Same as c, but set cpy_lib.
+           cpy_lib=$OPTARG ;;
         f) ftp=ftp ;;                   # Downowad the package directory from
 #                                         the ftp server to the src directory
 #                                         of the current working directory.
@@ -195,54 +216,67 @@ fi
 echo
 ok_to_continue "working in $b$t$PWD$n"
 
-# Define directory variables.
+# Define variables for use in this script and sourced action scripts.
 
-bin=$PWD/bin                            # bin directory referenced by sourced
-#                                         action_scripts.
-src=$PWD/src                            # src directory.
-pkg=$src/${pkg_name,,}                  # Name of the package source directory
-#                                         using a lower case package name.
+pkg_name_lower=${pkg_name,,}            # pkg_name may be upper or mixed case.
+bin=$PWD/bin                            # bin directory for executables.
+src=$PWD/src                            # src directoryfor downloads.
+pkg=$src/$pkg_name_lower                # Package directory in the src
+#                                         directory.
 
 # If remove was selected, do it first.
 
 source_action_script $remove
 
-# Optionally download files from either the ftp server or the github server.
+# Optionally copy files from a local directory, download them from an ftp
+# server, or download them from github.
 
-if [[ $ftp ]]; then
+if [[ $cpy ]]; then
+    cpy_lib=${cpy_lib:-/Volumes/mac-pro-share/krause/papamac}
+    cpy_path=$cpy_lib/$pkg_name
+    if [[ ! -d $cpy_path ]]; then
+        errmsg "cpy: $cpy_path: library not found"
+        echo_exit 7
+    fi
+    infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
+    mkdir -p $pkg
+    cp $cpy_path/* $pkg
+    chown_to_ref $PWD $src
+
+elif [[ $ftp ]]; then
     ftp_usr=${FTP_USR:-papamac}         # ftp account username.
     ftp_pwd=${FTP_PWD:-papa2352}        # ftp account password.
     ftp_url=${FTP_URL:-ftps://mac-pro.local:2121}  # ftp server URL.
-    ftp_dir=${FTP_DIR:-Software}        # ftp package directory.
+    ftp_dir=${ftp_dir:-papamac}         # ftp package directory.
+    ftp_path=$ftp_url/$ftp_dir/$pkg_name
     wget_opts='-qrR .DS_Store -nH --cut-dirs=2 --check-certificate=quiet'
     wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
     exclude_list="$ftp_dir/$pkg_name/.*"
-    ftp_path=$ftp_url/$ftp_dir/$pkg_name
     infomsg "downloading $b$t$ftp_path$n to $b$t$pkg$n"
     wget $wget_opts -X $exclude_list -P $pkg $ftp_path
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "wget: $pkg_name: download error ($exit_status)"
         rm -fr $pkg
-        echo_exit 7
+        echo_exit 8
     fi
-    chown -R --reference=$PWD $src
+    chown_to_ref $PWD $src
 
 elif [[ $git ]]; then
     rm -fr $pkg
-    git_usr=${GIT_USR:-papamac}         # github account username.
+    git_usr=${git_usr:-papamac}         # github account username.
     git_url=${GIT_URL:-https://github.com}  # github server URL.
-    git_path=$git_url/$git_usr
+    git_path=$git_url/$git_usr/$pkg_name
     infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone $git_path/$pkg_name $pkg
+    git clone $git_path $pkg
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
         rm -fr $pkg
-        echo_exit 8
+        echo_exit 9
     fi
     rm -fr $pkg/.[!.]*
-    chown -R --reference=$PWD $src
+    chown_to_ref $PWD $src
 fi
 
 # Optionally execute install and option action bash-scripts in the correct order.
