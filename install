@@ -8,8 +8,8 @@
 #    USAGE:  source src/bash-scripts/install or p2pkg -i bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.6
-#     DATE:  April 13, 2020
+#  VERSION:  1.0.7
+#     DATE:  April 15, 2020
 #
 #
 # MIT LICENSE:
@@ -77,14 +77,14 @@ fi
 
 # Install home files and directories.
 
-infomsg "$g${t}install:$n installing $b${t}bash_aliases$n and $b${t}bin$n in $b$t$HOME$n"
+infomsg "$g${t}install:$n installing $c${t}bash_aliases$n and $b${t}bin$n in $b$t$HOME$n"
 cp $pkg/bash_aliases ~/.bash_aliases
 mkdir -p ~/bin
-chown_to_ref $HOME ~/bin ~/.bash_aliases
+chown_to_ref $HOME ~/.bash_aliases ~/bin
 
 # Install the p2pkg script.
 
-infomsg "$g${t}install:$n installing $b${t}p2pkg$n in $b$t$bin$n"
+infomsg "$g${t}install:$n installing $g${t}p2pkg$n in $b$t$bin$n"
 chmod +x $pkg/p2pkg
 mkdir -p $bin
 ln -fs $pkg/p2pkg $bin
