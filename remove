@@ -62,6 +62,8 @@
 #
 ###############################################################################
 
+net=/etc/netatalk
+
 # Check for valid HOME directory.
 
 if [[ $HOME == "/root" ]]; then
@@ -83,7 +85,6 @@ rm -r $pkg
 
 # Restore afp.conf if it was changed from the original file.
 
-net=/etc/netatalk
 if [[ -f $net/afp.conf.save ]]; then
     infomsg "$g${t}remove:$n restoring $c${t}afp.conf$n in $b$t$net$n"
     mv -T $net/afp.conf.save $net/afp.conf
