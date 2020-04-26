@@ -2,7 +2,7 @@ Raspberry Pi Configuration Recipe
 ==================================
 ####Raspbian Buster (Raspbian built on Debian Buster)
 
-####April 5, 2020
+####April 26, 2020
 
 Install and configure Raspbian Buster:
 -----------------------------------------------------------------------------------
@@ -101,6 +101,7 @@ Configure local options:
 3. Enable and start the pigpio server daemon (pigpiod):
  * **sudo systemctl enable pigpiod**
  * **sudo systemctl start pigpiod**
+ * **systemctl status pigpiod**
  
 4. Give the user pi permission to administer printers and faxes:
  * **sudo usermod -aG lpadmin pi**
@@ -112,12 +113,12 @@ Configure local options:
  * **sudo -E ~/bash-scripts/p2pkg -gio bash-scripts**
  * Reply Y to confirm the working directory.
  * **sudo rm -r ~/bash-scripts**
- * **reboot**
 
-6. Install an optional software PACKAGE into ~/src and ~/bin:
- * Open a terminal window in the pi home directory.
- * **p2pkg -fi PACKAGE**
+6. Download the papamaclib package from github:
+ * **sudo p2pkg -g papamaclib**
  
+7. Reboot to enable bash-scripts:
+ * **reboot**
 
 Add HP printers and faxes:
 ----------------------------------------------------------------------------------- 
@@ -169,11 +170,8 @@ Optionally install messagesocket:
 1. Select the /usr/local directory for the installation:
  * Open a terminal window.
  * **c /usr/local**
-
-2. If not done previously, download the papamaclib package from github:
- * **sudo p2pkg -g papamaclib**
  
-3. Download and install the messagesocket package:
+2. Download and install the messagesocket package:
  * **sudo p2pkg -gi messagesocket**
 
 Optionally install scale:
@@ -182,11 +180,8 @@ Optionally install scale:
 1. Select the /usr/local directory for the installation:
  * Open a terminal window.
  * **c /usr/local**
-
-2. If not done previously, download the papamaclib package from github:
- * **sudo p2pkg -g papamaclib**
  
-3. Download and install the scale package:
+2. Download and install the scale package:
  * **sudo p2pkg -gio scale**
 
 Optionally install PiDACS:
@@ -218,13 +213,10 @@ MCP4822    |2-Channel 12-Bit D/A Converter                     |db#
  * Open a terminal window.
  * **c /usr/local**
 
-3. If not done previously, download the papamaclib package from github:
-  * **sudo p2pkg -g papamaclib**
-
-4. Download and install the PiDACS package, and install/start the PiDACS server daemon:
+3. Download and install the PiDACS package, and install/start the PiDACS server daemon:
   * **sudo p2pkg -gio PiDACS port1 port2... portn**
  
-5. Reboot if desired to test system startup.
+4. Reboot if desired to test system startup.
  * **reboot**
 
 Optionally install ser2sock:
