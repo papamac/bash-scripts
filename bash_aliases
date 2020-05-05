@@ -7,8 +7,8 @@
 #            functions for general use.
 #    USAGE:  Installed in the home directory as the file .bash_aliases.
 #   AUTHOR:  papamac
-#  VERSION:  1.0.4
-#     DATE:  April 13, 2020
+#  VERSION:  1.0.5
+#     DATE:  May 5, 2020
 #
 #
 # MIT LICENSE:
@@ -95,7 +95,7 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
-alias indigohost='/Library/Application\ Support/Perceptive\ Automation/Indigo\ 7.3/IndigoPluginHost.app/Contents/MacOS/IndigoPluginHost'
+alias indigohost='/Library/Application\ Support/Perceptive\ Automation/Indigo\ 7.4/IndigoPluginHost.app/Contents/MacOS/IndigoPluginHost'
 
 ###############################################################################
 #
