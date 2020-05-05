@@ -228,8 +228,7 @@ Optionally install ser2sock:
  * **sudo apt-get autoremove**
  * Reply Y to complete the operation.
  * **c /usr/local**
- * **export GIT_USR=nutechsoftware**
- * **sudo p2pkg -g ser2sock**
+ * **sudo p2pkg -G nutechsoftware ser2sock**
 
 2. Build and install ser2sock:
  * **c src/ser2sock**
