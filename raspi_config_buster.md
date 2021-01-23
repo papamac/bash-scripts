@@ -2,7 +2,7 @@ Raspberry Pi Configuration Recipe
 ==================================
 ####Raspbian Buster (Raspbian built on Debian Buster)
 
-####April 26, 2020
+####May 13, 2020
 
 Install and configure Raspbian Buster:
 -----------------------------------------------------------------------------------
@@ -94,6 +94,10 @@ Configure local options:
  * Reply Y to complete the installation.
  * **sudo apt-get install stress-ng mesa-utils ttf-mscorefonts-installer**
  * Reply Y to complete the installation.
+ * **sudo apt-get install automake**
+ * Reply Y to complete the installation.
+ * **sudo apt-get autoremove**
+ * Reply Y to complete the operation.
  
 2. Install optional Python packages:
  * **sudo pip3 install adafruit-circuitpython-ssd1306**
@@ -116,6 +120,7 @@ Configure local options:
 
 6. Download the papamaclib package from github:
  * **sudo p2pkg -g papamaclib**
+ * Reply Y to confirm the working directory.
  
 7. Reboot to enable bash-scripts:
  * **reboot**
@@ -137,6 +142,52 @@ Add HP printers and faxes:
  * Repeat the process if needed for any additional devices.
  * Close the HP Device Manager window.
 
+```
+At this point the disk image can be cloned by selecting Main Menu, Accessories, and then SD Card Copier.  This is useful if boot disks for multiple Raspberry Pi's are to be created using this basic configuration.
+```
+
+
+Optionally install papamac packages:
+----------------------------------------------------------------------------------
+1. Select the /usr/local directory for the installation:
+ * Open a terminal window.
+ * **c /usr/local**
+2. Optionally download and install the messagesocket package:
+ * **sudo p2pkg -gi messagesocket**
+ * Reply Y to confirm the working directory.
+3. Optionally download and install the PiDACS package:
+ * Identify the hardware devices to be used by PiDACS and their relative hardware addresses.  The relative addresses are hardwired or jumper selectable on the I/O boards. They are typically in the range 0-7 and are represented by the character "#" in the table  below. Use the table to determine the port names for the devices.  For example, ab0 and ab1 are the port names of two MCP3424 devices with relative addresses 0 and 1.
+
+ ```
+     Device     |                Description                         |Port Name
+------------|----------------------------------------------------|----------
+BCM2835,6,7 |Baseline GPIO set (GPIOs 17-18, 22-25, 27)          |   gp0
+BCM2835,6,7 |Extended GPIO set (GPIOs 5-6, 12-13, 16, 19-21, 26) |   gp1
+MCP23008    |8-Bit I/O Expander                                  |   ga#
+MCP23017    |16-Bit I/O Expander (A Port)                        |   ga#
+MCP23017    |16-Bit I/O Expander (B Port)                        |   gb#
+MCP3204     |4-Channel 12-Bit A/D Converter                      |   ad#
+MCP3208     |8-Channel 12-Bit A/D Converter                      |   ae#
+MCP3422,3   |2-Channel 18-Bit A/D Converter                      |   aa#
+MCP3424     |4-Channel 18-Bit A/D Converter                      |   ab#
+MCP4821     |1-Channel 12-Bit D/A Converter                      |   da#
+MCP4822     |2-Channel 12-Bit D/A Converter                      |   db#
+```
+ * All Raspberry Pi's have built-in GPIO channels. These are divided into two sets: a Baseline GPIO set with 7 GPIO channels on the original Pi models and an additional Extended GPIO set with 9 channels on current models. The port names for these two sets are gp0 for the Baseline set and gp1 for the Extended set.
+ * Make a list of the three-character port names to be processed by PiDACS on this Raspberry Pi.  The list will be entered in the p2pkg command below as individual arguments separated by spaces, for example, ab0 ab1 ga0 gb0 gp0 gp1. 
+ * **sudo p2pkg -gio PiDACS port1 port2... portn**
+ * Reply Y to confirm the working directory.
+4. Optionally download and install the scale package:
+ * **sudo p2pkg -gio scale**
+ * Reply Y to confirm the working directory.
+5. Optionally download and install the ser2sock and ser2sock-scripts packages:
+ * **sudo p2pkg -G nutechsoftware ser2sock**
+ * Reply Y to confirm the working directory.
+ * **sudo p2pkg -gio ser2sock-scripts**
+ * Reply Y to confirm the working directory.
+6. Confirm startup of any installed daemons:
+ * **reboot**
+ * **systemctl status daemon_name** (e.g., pidacsd, scaled, ser2sockd)
 
 Optionally install BitScope DSO:
 -----------------------------------------------------------------------------------
@@ -164,90 +215,6 @@ Optionally install BitScope DSO:
  * Select Panel Applets, Application Launch Bar, and then Preferences
  * In the Other list choose BitScope DSO and add it to the end of the Application Launch Bar.
 
-Optionally install messagesocket:
------------------------------------------------------------------------------------
-
-1. Select the /usr/local directory for the installation:
- * Open a terminal window.
- * **c /usr/local**
- 
-2. Download and install the messagesocket package:
- * **sudo p2pkg -gi messagesocket**
-
-Optionally install scale:
------------------------------------------------------------------------------------
-
-1. Select the /usr/local directory for the installation:
- * Open a terminal window.
- * **c /usr/local**
- 
-2. Download and install the scale package:
- * **sudo p2pkg -gio scale**
-
-Optionally install PiDACS:
------------------------------------------------------------------------------------
-1. Create a port_names list:
- * Identify the hardware devices to be used by PiDACS and their relative hardware addresses.  The relative addresses are hardwired or jumper selectable on the I/O boards. They are typically in the range 0-7 and are represented by the character "#" below. Use the table below to determine the port names for the devices.  For example, ab0 and ab1 are the port names of two MCP3424 devices with relative addresses 0 and 1.
-
- ``` 
-Note that all Raspberry Pi's have built-in GPIO channels. These are divided into two sets: a Baseline GPIO set with 7 GPIO channels on the original Pi models and an additional Extended GPIO set with 9 channels on current models. The port names for these two sets are gg0/gp0 for the Baseline set and gg1/gp1 for the Extended set.  Use the gg names if the primary identifiers for the channels are to be the BCM GPIO numbers.  Use the gp names if the primary channel identifiers will be the Raspberry Pi header pin numbers.` 
-```
- ```
- Device     |Description                                        |Port Name(s)
------------|---------------------------------------------------|------------
-BCM2835,6,7|Baseline GPIO set (GPIOs 17-18, 22-25, 27)         |gg0/gp0
-BCM2835,6,7|Extended GPIO set (GPIOs 5-6, 12-13, 16, 19-21, 26)|gg1/gp1
-MCP23008   |8-Bit I/O Expander                                 |ga#
-MCP23017   |16-Bit I/O Expander (A Port)                       |ga#
-MCP23017   |16-Bit I/O Expander (B Port)                       |gb#
-MCP3204    |4-Channel 12-Bit A/D Converter                     |ad#
-MCP3208    |8-Channel 12-Bit A/D Converter                     |ae#
-MCP3422,3  |2-Channel 18-Bit A/D Converter                     |aa#
-MCP3424    |4-Channel 18-Bit A/D Converter                     |ab#
-MCP4821    |1-Channel 12-Bit D/A Converter                     |da#
-MCP4822    |2-Channel 12-Bit D/A Converter                     |db#
-```
- * Make a list of the three-character port names to be processed by PiDACS on this Raspberry Pi.  The list will be entered in the p2pkg command in step 3 as individual arguments separated by spaces, for example, ab0 ab1 ga0 gb0 gg0 gg1.
-
-2. Select the /usr/local directory for the installation:
- * Open a terminal window.
- * **c /usr/local**
-
-3. Download and install the PiDACS package, and install/start the PiDACS server daemon:
-  * **sudo p2pkg -gio PiDACS port1 port2... portn**
- 
-4. Reboot if desired to test system startup.
- * **reboot**
-
-Optionally install ser2sock:
------------------------------------------------------------------------------------
-1. Install needed packages and clone ser2sock repository:
- * Open a terminal window.
- * **sudo apt-get install automake**
- * Reply Y to complete the installation.
- * **sudo apt-get autoremove**
- * Reply Y to complete the operation.
- * **c /usr/local**
- * **sudo p2pkg -G nutechsoftware ser2sock**
-
-2. Build and install ser2sock:
- * **c src/ser2sock**
- * **sudo ./configure**
- * **sudo make**
- * **sudo cp ser2sock /usr/local/bin**
-
-3. Edit and install the ser2sock.conf file:
- * **sudo mkdir -p /etc/ser2sock** 
- * **cmds='s|/dev/ttyAMA0|/dev/serial0|;s|mode = 0|mode = 1|;'**
- * **sed "$cmds" etc/ser2sock/ser2sock.conf | sudo tee /etc/ser2sock/ser2sock.conf**
- 
-4. Install the ser2sock daemon script, link it for automatic startup on reboot, and start it in the current boot session::
- * **sudo cp init/ser2sock /etc/init.d**
- * **sudo update-rc.d ser2sock defaults**
- * **sudo /etc/init.d/ser2sock start**
- 
-5. Reboot if desired to test system startup.
- * **reboot**
 
 
 Optionally install alarmdecoder and alarmdecoder-webapp:
