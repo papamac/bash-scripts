@@ -95,7 +95,7 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
-alias indigohost='/Library/Application\ Support/Perceptive\ Automation/Indigo\ 7.5/IndigoPluginHost.app/Contents/MacOS/IndigoPluginHost'
+alias indigohost='/Library/Application\ Support/Perceptive\ Automation/Indigo\ 2021.1/IndigoPluginHost.app/Contents/MacOS/IndigoPluginHost'
 
 ###############################################################################
 #
