@@ -1,25 +1,24 @@
 Raspberry Pi Configuration Recipe
 ==================================
-####Raspberry Pi OS Full 2021-01-11
-
-####February 3, 2021
+####Raspberry Pi OS Full 2021-10-30 (based on Debian bullseye)
+####December 20, 2021
 
 Install and configure Raspberry Pi OS:
 -----------------------------------------------------------------------------------
 
-1. Download the Raspberry Pi OS image to an unused micro SD card:
+1. Download the Raspberry Pi OS image to an unused micro SD card or USB drive:
  * Launch the Raspberry Pi Imager app on the Mac.
- * Insert the SD card in the reader.
- * Select the Raspberry Pi OS Full version to be downloaded.
- * Select the SD card.
- * Click Write and then Yes to allowing the card to be overwritten.
- * Wait for the card to be written and verified (about 20 min).
- * Click Continue, remove the SD card, and quit the imager.
+ * Insert the micro SD card into a reader on the Mac or connect the USB drive.
+ * Select the Raspberry Pi OS (other) and then Raspberry Pi OS Full.
+ * Select the SD card/USB drive.
+ * Click Write and then Yes to allowing the card/drive to be overwritten.
+ * Wait for the card/drive to be written and verified (about 10 min).
+ * Click Continue, remove the card/drive, and quit the imager.
  
-2. Boot the Raspberry Pi with the SD card::
+2. Boot the Raspberry Pi:
  * Connect a monitor and keyboard to the Raspberry Pi to be used in the initial configuration (steps 3-6).
- * Optionally connect a wired ethernet port to facilitate initial downloads over the internet.
- * Insert the micro SD card into the Raspberry Pi and apply power.
+ * Optionally connect the Pi to a wired ethernet port to facilitate initial downloads over the internet.
+ * Insert the micro SD card or connect the USB drive and apply power to the Pi.
  * Wait for the boot to complete. 
 3. Perform the initial configuration and update the distribution:
  * Click Next on the Raspberry Pi welcome window.
@@ -35,17 +34,17 @@ Install and configure Raspberry Pi OS:
 If the above update fails to complete successfully, click Back and start it again. If the problem persists, perform the following steps to manually update the distribution:
 ```
  * Open a terminal window in the pi home directory.
- * **sudo apt-get --allow-releaseinfo-change update**
- * **sudo apt-get dist-upgrade**
- * **sudo apt-get autoremove**
+ * **sudo apt --allow-releaseinfo-change update**
+ * **sudo apt dist-upgrade**
+ * **sudo apt autoremove**
  * Click Shutdown in the Applications menu and then Reboot.
 
 4. Setup the pi desktop:
  * Right-click on the menu bar and then select Panel Settings. 
- * Click Bottom to move the panel to the bottom of the screen.
- * Select Panel Applets and then click Add/Remove/Up/Down to configure the following applets: (1) Menu, (2) System Tray, (3) Application Launch Bar, (4) Spacer - 5, (5) Task Bar - stretch, (6) Ejecter, (7) Bluetooth, (8) Wireless & Wired Network, (9) Volume Control, (10) CPU Usage Monitor, (11) CPU Temperature Monitor, (12) CPUFreq frontend, and (13) Digital Clock.
+ * Click Geometry/Bottom to move the panel to the bottom of the screen.
+ * Select Panel Applets and then click Add/Remove/Up/Down to configure the following applets: (1) Menu, (2) System Tray, (3) Application Launch Bar, (4) Spacer, (5) Task Bar - stretch, (6) Updater, (7) Ejecter, (8) Bluetooth, (9) Wireless & Wired Network, (10) Volume Control, (11) CPU Usage Monitor, (12) CPU Temperature Monitor, (13) CPUFreq frontend, and (14) Digital Clock.
  * Select CPU Usage Monitor/Preferences and then click Show usage as percentage.
- * Select Application Launch Bar/Preferences and then click Add/Remove/Up/Down to configure the application launch bar as follows: (1) File Manager, (2) Task Manager, (3) Terminal (4) VNC Viewer, (5) Web Browser, (6) Text Editor, (7) PDF Viewer, (8) Mathematica, (9) Wolfram, (10) Thonny Python IDE, and (11) mu.
+ * Select Application Launch Bar/Preferences and then click Add/Remove/Up/Down to configure the application launch bar as follows: (1) File Manager, (2) Task Manager, (3) Terminal (4) VNC Viewer, (5) Web Browser, (6) Claws Mail, (7) Text Editor, (8) PDF Viewer, (9) Mathematica, (10) Scratch 3, (11) Thonny Python IDE, and (12) Wolfram.
  * Close the Application Launch Bar and Panel Preferences windows.
  * Move the Trash to the lower right of the desktop.
  * From the Main Menu select Preferences, Appearance Settings, Desktop and then select a new desktop photo.
@@ -53,48 +52,25 @@ If the above update fails to complete successfully, click Back and start it agai
 5. Continue the configuration using menu options:
  * From the Main Menu select Preferences and then Raspberry Pi Configuration.
  * In the System tab click in the Hostname box and set the Hostname for this Raspberry Pi.
+ * Select the Display tab and then select a Headless Resolution of 1920x1080.
  * Moving to the Interfaces tab, select Enabled for all interfaces except the Serial Console and 1-Wire which should be Disabled.
  * Click OK and then Yes to reboot and apply the settings.
  * Right-click on the leftmost VNC icon in the panel and click Options.
  * Click Expert and scroll to the IdleTimeout parameter.
  * Set IdleTimeout to 0 and click Apply.
  * Click OK to close the VNC Server Options window.
- 
-6. Complete the configuration by manually setting the display resolution to 1920x1080 for headless VNC operation.
- * From the Main Menu select Logout then Shutdown.
- * Wait several seconds then remove power from the Pi.
- * Remove the display, keyboard, and ethernet connections from the Pi.
- * Connect a 4K display emulator to the HDMI connector and reapply power.
- * Wait about a minute for the reboot, then launch the VNC Viewer on the Mac and log into the Pi.
- * **For a Pi 3b+ or earlier**, select Main Menu, Preferences, Raspberry Pi Configuration, Display, and Set Resolution.
- * Select DMT Mode 82 1920x1080 60 Hz 16:9 and click OK.
- * Remove the display emulator from the HDMI port.
- * Click OK and Yes to reboot.
- * **For a Pi 4b**, open a terminal window in the pi home directory.
- * **sudo raspi-config**
- * Use the down arrow to select 2 Display Options, then again to select D1 Resolution.
- * Use the up/down arrows or scroll to select DMT Mode 82 1920x1080 60 Hz 16:9.
- * Use the right arrow to select OK and confirm.
- * Use the right arrow again to select Finish.
- * Remove the display emulator from the HDMI port.
- * Select Yes to reboot.
- * If the rebooted VNC screen size is not 1920x1080, select the Main Menu, Preferences, and then Screen Configuration to set the resolution again.
- 
+  
  ```
-At this point, continue this configuration procedure using the VNC Viewer on the Mac.
+At this point, the configuration procedure can be continued using the VNC Viewer on the Mac.  If desired, shutdown the Pi, remove the power, remove the monitor and keyboard, and then restore the power to boot for VNC-only operation.
 ```
 
 Configure local options:
 -----------------------------------------------------------------------------------
 1. Install the afp server, printer software, comm, stress testing tools, et al:
  * Open a terminal window in the pi home directory.
- * **sudo apt-get install agnostics netatalk hplip-gui telnet**
+ * **sudo apt install automake netatalk hplip-gui telnet ttf-mscorefonts-installer**
  * Reply Y to complete the installation.
- * **sudo apt-get install stress-ng mesa-utils ttf-mscorefonts-installer**
- * Reply Y to complete the installation.
- * **sudo apt-get install automake**
- * Reply Y to complete the installation.
- * **sudo apt-get autoremove**
+ * **sudo apt autoremove**
  * Reply Y to complete the operation.
  
 2. Install optional Python packages:
@@ -115,12 +91,8 @@ Configure local options:
  * **sudo -E ~/bash-scripts/p2pkg -gio bash-scripts**
  * Reply Y to confirm the working directory.
  * **sudo rm -r ~/bash-scripts**
-
-6. Download the papamaclib package from github:
- * **sudo p2pkg -g papamaclib**
- * Reply Y to confirm the working directory.
  
-7. Reboot to enable bash-scripts:
+6. Reboot to enable bash-scripts:
  * **reboot**
 
 Add HP printers and faxes:
@@ -141,7 +113,9 @@ Add HP printers and faxes:
  * Close the HP Device Manager window.
 
 ```
-At this point the disk image can be cloned by launching the SD Card Copier from Menu/Accessories.  This is useful if boot disks for multiple Raspberry Pi's are to be created using this basic configuration.  Note that the SD Card Copier requires an empty SD card as the copy destination.  If needed, the Raspberry Pi Imager app can be used to erase an SD card on the Mac.
+At this point the disk image can be cloned by launching the SD Card Copier from Menu/Accessories.  This is useful if boot disks for multiple Raspberry Pi's are to be created using this basic configuration.  The SD Card Copier requires an empty SD card or USB drive as the copy destination.  If needed, the Raspberry Pi Imager app can be used to erase an SD card or USB drive on the Mac.
+
+Note that there are issues in cloning a disk image built on a Pi 4b and then using it on a Pi 3b+.  One issue is that the VNC screen resolution cannot be expanded on the Pi 3b+.  There may be other issues as well.  It's best to build/clone a disk image on the same Pi model as the intended target.
 ```
 
 
@@ -150,10 +124,13 @@ Optionally install papamac packages:
 1. Select the /usr/local directory for the installation:
  * Open a terminal window.
  * **c /usr/local**
-2. Optionally download and install the messagesocket package:
+2. Download the papamaclib package from github:
+ * **sudo p2pkg -g papamaclib**
+ * Reply Y to confirm the working directory.
+3. Optionally download and install the messagesocket package:
  * **sudo p2pkg -gi messagesocket**
  * Reply Y to confirm the working directory.
-3. Optionally download and install the PiDACS package:
+4. Optionally download and install the PiDACS package:
  * Identify the hardware devices to be used by PiDACS and their relative hardware addresses.  The relative addresses are hardwired or jumper selectable on the I/O boards. They are typically in the range 0-7 and are represented by the character "#" in the table  below. Use the table to determine the port names for the devices.  For example, ab0 and ab1 are the port names of two MCP3424 devices with relative addresses 0 and 1.
 
  ```
@@ -175,15 +152,15 @@ MCP4822     |2-Channel 12-Bit D/A Converter                      |   db#
  * Make a list of the three-character port names to be processed by PiDACS on this Raspberry Pi.  The list will be entered in the p2pkg command below as individual arguments separated by spaces, for example, ab0 ab1 ga0 gb0 gp0 gp1. 
  * **sudo p2pkg -gio PiDACS port1 port2... portn**
  * Reply Y to confirm the working directory.
-4. Optionally download and install the scale package:
+5. Optionally download and install the scale package:
  * **sudo p2pkg -gio scale**
  * Reply Y to confirm the working directory.
-5. Optionally download and install the ser2sock and ser2sock-scripts packages:
+6. Optionally download and install the ser2sock and ser2sock-scripts packages:
  * **sudo p2pkg -G nutechsoftware ser2sock**
  * Reply Y to confirm the working directory.
  * **sudo p2pkg -gio ser2sock-scripts**
  * Reply Y to confirm the working directory.
-6. Confirm startup of any installed daemons:
+7. Confirm startup of any installed daemons:
  * **reboot**
  * **systemctl status daemon_name** (e.g., pidacsd, scaled, ser2sockd)
 
