@@ -149,8 +149,10 @@ function source_action_script {         # Conditionally source package-unique
 
 # Parse options and set action variables.
 
-while getopts 'cC:fF:gG:hiI:oO:rR:' opt; do
+while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
     case $opt in
+        b) branch="-b $OPTARG" ;;        # Define branch/tag option for git
+#                                         clone in github download.
         c) cpy=cpy ;;                   # Copy the package directory from a
 #                                         local library to the src directory
 #                                         of the current working directory.
@@ -260,7 +262,7 @@ elif [[ $git ]]; then
     git_url=${GIT_URL:-https://github.com}  # github server URL.
     git_path=$git_url/$git_usr/$pkg_name
     infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone $git_path $pkg
+    git clone $branch $git_path $pkg
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
