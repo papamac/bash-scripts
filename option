@@ -7,8 +7,8 @@
 #    USAGE:  source src/bash-scripts/option or p2pkg -o bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.6
-#     DATE:  December 26, 2023
+#  VERSION:  1.0.7
+#     DATE:  February 7, 2024
 #
 #
 # UNLICENSE:
@@ -37,14 +37,14 @@
 # DESCRIPTION:
 #
 # The Server Message Block (SMB) protocol provides file sharing between an SMB
-# server and an SMB client.  The the samba package includes an smbd daemon that
-# provides an SMB server for Raspberry Pi OS and MacOS has a built-in SMB
-# client.  smbd requires a configuration file named smb.conf located in the
-# /etc/samba directory.  papamac's smb.conf is included in the bash-
-# scripts package that has already been downloaded to the src sub-directory of
-# the current working directory.  The option script copies this file to
-# /etc/samba after saving the original file so that the original file can be
-# restored by the remove script.
+# server and an SMB client.  The the samba package distributed with Raspberry
+# Pi OS includes an smbd daemon that serves pi files to a built-in MacOS SMB
+# client that can access them.  smbd requires a configuration file named
+# smb.conf located in the /etc/samba directory.  papamac's smb.conf is included
+# in the bash-scripts package that has already been downloaded to the
+# src/bash-scripts sub-directory of the current working directory.  The option
+# script copies papamac's smb.conf file to /etc/samba after saving the original
+# file so that the original file can be restored by the remove script.
 #
 # option is designed to be used with p2pkg.  This can be done as part of a
 # complete installation or separately.  Usage examples are as follows:
@@ -69,6 +69,13 @@
 ###############################################################################
 
 smb=/etc/samba
+
+# Ensure that the samba package has been installed.
+
+if [[ ! -d $smb ]]; then
+    errmsg "option: samba not installed; $pkg_name option aborted"
+    echo_exit 11
+fi
 
 # Save the original smb.conf file from the samba installation and install
 # the new file from bash-scripts.

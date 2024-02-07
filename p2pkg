@@ -4,13 +4,13 @@
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
 #     FILE:  p2pkg
 #    TITLE:  papamac's personal package utility (p2pkg)
-# FUNCTION:  Copy, download, install, and remove papamac's packages.
+# FUNCTION:  Copy, download, clone, install, and remove papamac's packages.
 #    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
 #            See p2pkg -h for more precise usage.
 #  OPTIONS:  See getopts comments in the script below.
 #   AUTHOR:  papamac
-#  VERSION:  1.0.10
-#     DATE:  December 26, 2023
+#  VERSION:  1.0.11
+#     DATE:  February 7, 2024
 #
 #
 # UNLICENSE:
@@ -38,12 +38,23 @@
 #
 # DESCRIPTION:
 #
-# p2pkg optionally copies a package from a local library (p2pkg -c PACKAGE),
-# downloads a package from an ftp server (p2pkg -f PACKAGE), or downloads a
-# package from github (p2pkg -g PACKAGE).  It loads the package into the src
-# sub-directory of the current working directory.  The package name is the only
-# required positional argument and is used to access the package from the local
-# library, the ftp server, or github.
+# p2pkg optionally copies a package from a default local library
+# (p2pkg -c PACKAGE), downloads a package from a default ftp server
+# (p2pkg -f PACKAGE), or clones a package from papamac's github repository
+# (p2pkg -g PACKAGE).  Non-default sources are specified by using capital
+# letters followed by a source designator: (p2pkg -C LOCAL_LIBRARY PACKAGE),
+# (p2pkg -F FTP_SERVER PACKAGE), or (p2pkg -G GITHUB_USER PACKAGE).  By default
+# p2pkg github options clone the master branch of the github repository.  If
+# desired, another branch or tag can be cloned using the -b option,
+# (p2pkg -b BRANCH_OR_TAG -G GITHUB_USER PACKAGE).
+#
+# p2pkg copies/downloads/clones the package into a new sub-directory within src
+# directory of the current working directory.  The package name is the only
+# required positional argument and is used to both access the source package
+# to name the destination sub-directory.  Note that the package loading options
+# (-c -C, -f, -F, -g, -g) overwrite an existing package with the same name in
+# the current working directory.  There is no need to remove a package before
+# re-loading it.
 #
 # p2pkg optionally installs previously loaded package files (p2pkg -i PACKAGE),
 # removes them (p2pkg -r PACKAGE), or executes a package-unique option (p2pkg
@@ -51,16 +62,12 @@
 # remove, and option which, if implemented, must reside in the package src
 # directory.
 #
-# The -c, -f, and -g options are mutually exclusive.  The -i, -o, and -r
-# options may be selected individually (e.g., p2pkg -i PACKAGE) or combined
-# with -c, -f, or -g  (e.g., p2pkg -fio PACKAGE).  If -i, -o, and -r options
+# The (-c, -C), (-f, -F), and (-g, -G) options are mutually exclusive.  The -i,
+# -o, and -r options may be selected individually (p2pkg -i PACKAGE) or
+# combined with -c, -f, or -g (p2pkg -gio PACKAGE).  If -i, -o, and -r options
 # are selected individually they will operate on an existing package that has
 # already been loaded by p2pkg.  If a combination of options is specified, -r
 # is executed first, then -c, -f, or , -g, and finally -i and -o.
-#
-# Note that the package loading options (-c, -f, -g) overwrite an existing
-# package in the current working directory, so that there is no need to remove
-# a package before re-installing it.
 #
 # Arguments may be passed to the package-unique action scripts by selecting -I,
 # -R, or -O followed by an argument instead of simply using -i, -r, or -o.
@@ -107,8 +114,13 @@ fi
 
 script=${0##*/}                         # Script name.
 usage="\
-usage: p2pkg [-h] | [[[-c | -C cpy_lib] | [-f | -F ftp_dir] | [-g | -G git_usr]]
-             [-i | -I install_arg] [-o | -O option_arg] [-r | -R remove_arg]
+usage: p2pkg [-h] |
+             [[[-c | -C cpy_lib] |
+             [-f | -F ftp_dir] |
+             [[-b branch][-g | -G github_usr]]
+             [-i | -I install_arg]
+             [-o | -O option_arg]
+             [-r | -R remove_arg]
              package_name [argument...]]"
 
 function errmsg { echo "$r$t$script: $1$n" >&2; }
@@ -151,8 +163,8 @@ function source_action_script {         # Conditionally source package-unique
 
 while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
     case $opt in
-        b) branch="-b $OPTARG" ;;        # Define branch/tag option for git
-#                                         clone in github download.
+        b) branch="-b $OPTARG" ;;       # Define branch/tag option for the git
+#                                         clone in the github option.
         c) cpy=cpy ;;                   # Copy the package directory from a
 #                                         local library to the src directory
 #                                         of the current working directory.
@@ -167,8 +179,8 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
 #                                         the github server to the src
 #                                         directory of the current working
 #                                         directory.
-        G) git=git                      # Same as g, but set the git_usr.
-           git_usr=$OPTARG ;;
+        G) git=git                      # Same as g, but set the github_usr.
+           github_usr=$OPTARG ;;
         h) echo "$usage"                # Help.
            exit 0 ;;
         i) install=install              # Execute the package install script.
@@ -258,9 +270,9 @@ elif [[ $ftp ]]; then
 
 elif [[ $git ]]; then
     rm -fr $pkg
-    git_usr=${git_usr:-papamac}         # github account username.
+    github_usr=${github_usr:-papamac}       # github account username.
     git_url=${GIT_URL:-https://github.com}  # github server URL.
-    git_path=$git_url/$git_usr/$pkg_name
+    git_path=$git_url/$github_usr/$pkg_name
     infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
     git clone $branch $git_path $pkg
     exit_status=$?

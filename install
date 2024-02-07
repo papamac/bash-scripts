@@ -64,7 +64,7 @@
 # When running install via p2pkg in a sudo environment, sudo -E must be used to
 # preserve the user's HOME directory.  install checks for this and exits if
 # $HOME is /root.  papamac's runtime environment (see bash_aliases) prevents
-# this from hapening by aliasing sudo to sudo -E.
+# this from happening by aliasing sudo to sudo -E.
 #
 ###############################################################################
 
