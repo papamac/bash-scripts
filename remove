@@ -8,8 +8,8 @@
 #    USAGE:  source src/bash-scripts/remove or p2pkg -r bash-scripts (see
 #            examples below).
 #   AUTHOR:  papamac
-#  VERSION:  1.0.8
-#     DATE:  December 26, 2023
+#  VERSION:  1.0.9
+#     DATE:  February 17, 2024
 #
 #
 # UNLICENSE:
@@ -38,44 +38,32 @@
 # DESCRIPTION:
 #
 # The remove script removes all bash-scripts files from the HOME and current
-# working directories.  It restores the original smb.conf file (if any) in
-# /etc/samba.
+# working directories.
 #
 # remove is designed to be used with p2pkg.  Usage examples are as follows:
 #
 # sudo p2pkg -r bash-scripts            # Remove the bash-scripts package from
 #                                         the HOME and current working
-#                                         directories and restore
-#                                         /etc/netatalk/smb.conf.
+#                                         directories.
 # cd /usr/local                         # Remove the bash-scripts package from
-# sudo p2pkg -r bash-scripts              the HOME and /usr/local directories
-#                                         and restore /etc/netatalk/smb.conf.
+# sudo p2pkg -r bash-scripts              the HOME and /usr/local directories.
 #
 #
 # DEPENDENCIES/LIMITATIONS:
 #
-# Because it changes files and directories owned by root, p2pkg -r must be
-# executed using sudo.  Also, sudo -E must be used to preserve the user's HOME
-# directory.  remove checks for this and exits if $HOME is /root.  papamac's
-# runtime environment (see bash_aliases) prevents this from happening by
-# aliasing sudo to sudo -E.
+# When running remove via p2pkg in a sudo environment, sudo -E must be used to
+# preserve the user's HOME directory.  remove checks for this and exits if
+# $HOME is /root.  papamac's runtime environment (see bash_aliases) prevents
+# this from happening by aliasing sudo to sudo -E.
 #
 ###############################################################################
-
-smb=/etc/samba
 
 # Check for valid HOME directory.
 
 if [[ $HOME == "/root" ]]; then
     errmsg "remove: HOME directory is /root; use sudo -E"
-    echo_exit 9
+    echo_exit 10
 fi
-
-# Remove home file and directories.
-
-infomsg "$g${t}remove:$n removing home files and directories from $b$t$HOME$n"
-rm ~/.bash_aliases
-rmdir --ignore-fail-on-non-empty ~/bin
 
 # Remove bash-scripts files and directories from the current working directory.
 
@@ -83,9 +71,8 @@ infomsg "$g${t}remove:$n removing bash-scripts files and directories from $b$t$P
 rm $bin/p2pkg
 rm -r $pkg
 
-# Restore smb.conf if it was changed from the original file.
+# Remove home file and directories.
 
-if [[ -f $smb/smb.conf.save ]]; then
-    infomsg "$g${t}remove:$n restoring $c${t}smb.conf$n in $b$t$smb$n"
-    mv -T $smb/smb.conf.save $smb/smb.conf
-fi
+infomsg "$g${t}remove:$n removing home files and directories from $b$t$HOME$n"
+rm ~/.bash_aliases
+rmdir --ignore-fail-on-non-empty ~/bin
