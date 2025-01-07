@@ -45,9 +45,9 @@
 ###############################################################################
 
 ###############################################################################
-#
-# ENVIRONMENT VARIABLES
-#
+#                                                                             #
+# ENVIRONMENT VARIABLES                                                       #
+#                                                                             #
 ###############################################################################
 
 # Color usage in ls -l for Mac OS BSD:
@@ -85,9 +85,9 @@ W=$'\e[47m'                             # Set background color to white.
 export n t d u i v k r g y b m c w K R G Y B M C W
 
 ###############################################################################
-#
-# COMMAND LINE ALIASES
-#
+#                                                                             #
+# COMMAND LINE ALIASES                                                        #
+#                                                                             #
 ###############################################################################
 
 alias l='ls -lah'
@@ -95,17 +95,16 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
-alias sd='systemctl status'
-alias rd='sudo systemctl restart'
+alias ss='systemctl status'
 
 ###############################################################################
-#
-#    FUNCTION:  c
-#       TITLE:  change directory
-#    FUNCTION:  Change the working directory and list the contents of the new
-#               directory.
-#       USAGE:  c [dir]
-#
+#                                                                             #
+#    FUNCTION:  c                                                             #
+#       TITLE:  change directory                                              #
+#    FUNCTION:  Change the working directory and list the contents of the new #
+#               directory.                                                    #
+#       USAGE:  c [dir]                                                       #
+#                                                                             #
 ###############################################################################
 
 function c {
@@ -116,12 +115,12 @@ function c {
 }
 
 ###############################################################################
-#
-#    FUNCTION:  cp2bin
-#       TITLE:  copy to bin
-#    FUNCTION:  Copy files to ~/bin and make them executable.
-#       USAGE:  cp2bin [files]
-#
+#                                                                             #
+#    FUNCTION:  cp2bin                                                        #
+#       TITLE:  copy to bin                                                   #
+#    FUNCTION:  Copy files to ~/bin and make them executable.                 #
+#       USAGE:  cp2bin [files]                                                #
+#                                                                             #
 ###############################################################################
 
 function cp2bin {
@@ -131,12 +130,12 @@ function cp2bin {
 }
 
 ###############################################################################
-#
-#    FUNCTION:  mv2bin
-#       TITLE:  move to bin
-#    FUNCTION:  Move files to ~/bin and make them executable.
-#       USAGE:  mv2bin [files]
-#
+#                                                                             #
+#    FUNCTION:  mv2bin                                                        #
+#       TITLE:  move to bin                                                   #
+#    FUNCTION:  Move files to ~/bin and make them executable.                 #
+#       USAGE:  mv2bin [files]                                                #
+#                                                                             #
 ###############################################################################
 
 function mv2bin {
@@ -145,4 +144,19 @@ function mv2bin {
     chmod +x ~/bin/$files
 }
 
-export -f c cp2bin mv2bin
+###############################################################################
+#                                                                             #
+#    FUNCTION:  rss                                                           #
+#       TITLE:  restart and show status                                       #
+#    FUNCTION:  Use systemctl to restart a daemon and show its status.        #
+#       USAGE:  rss [daemon name or service name]                             #
+#                                                                             #
+###############################################################################
+
+function rss {
+    local daemon=$1
+    sudo systemctl restart daemon
+    systemctl status daemon
+}
+
+export -f c cp2bin mv2bin rss
