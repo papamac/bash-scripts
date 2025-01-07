@@ -3,12 +3,12 @@
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
 #     FILE:  bash_aliases
 #    TITLE:  papamac's bash runtime environment for Raspberry Pi OS and MacOS
-# FUNCTION:  Define commmon environment variables, command aliases and simple
+# FUNCTION:  Define common environment variables, command aliases and simple
 #            functions for general use.
 #    USAGE:  Installed in the home directory as the file .bash_aliases.
 #   AUTHOR:  papamac
-#  VERSION:  1.0.8
-#     DATE:  December 26, 2023
+#  VERSION:  1.0.9
+#     DATE:  January 7, 2025
 #
 #
 # UNLICENSE:
@@ -95,6 +95,8 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
+alias sd='systemctl status'
+alias rd='sudo systemctl restart'
 
 ###############################################################################
 #
