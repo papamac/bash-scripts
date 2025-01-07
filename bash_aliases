@@ -95,7 +95,7 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
-alias ss='systemctl status'
+alias ssd='systemctl status'
 
 ###############################################################################
 #                                                                             #
@@ -146,17 +146,17 @@ function mv2bin {
 
 ###############################################################################
 #                                                                             #
-#    FUNCTION:  rss                                                           #
-#       TITLE:  restart and show status                                       #
+#    FUNCTION:  rssd                                                          #
+#       TITLE:  restart and show status (daemon)                              #
 #    FUNCTION:  Use systemctl to restart a daemon and show its status.        #
-#       USAGE:  rss [daemon name or service name]                             #
+#       USAGE:  rssd [daemon name or service name]                            #
 #                                                                             #
 ###############################################################################
 
-function rss {
+function rssd {
     local daemon=$1
-    sudo systemctl restart daemon
-    systemctl status daemon
+    sudo systemctl restart $daemon
+    systemctl status $daemon
 }
 
-export -f c cp2bin mv2bin rss
+export -f c cp2bin mv2bin rssd
