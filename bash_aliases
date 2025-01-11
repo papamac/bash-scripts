@@ -153,6 +153,17 @@ function mv2bin {
 }
 
 
-export -f c cp2bin mv2bin
+###############################################################################
+#                                                                             #
+#                            Startup Script for                               #
+#                               Raspberry Pi                                  #
+#                                                                             #
+###############################################################################
 
+export -f c cp2bin mv2bin
+hostname
 mdns-hostname
+echo 'restarting avahi-daemon'
+restart avahi-daemon
+mdns-hostname
+hostname -I
