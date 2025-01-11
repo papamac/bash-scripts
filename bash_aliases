@@ -100,7 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdns-hostname='ps -ef | grep -m 1 avahi'
+alias mdns-hostname='ps -ef | grep -m 1 avahi | cut -d[ -f2 | cut -d] -f1'
 
 
 ###############################################################################
