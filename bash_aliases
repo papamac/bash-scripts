@@ -1,48 +1,50 @@
 ###############################################################################
-#
-#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
-#     FILE:  bash_aliases
-#    TITLE:  papamac's bash runtime environment for Raspberry Pi OS and MacOS
-# FUNCTION:  Define common environment variables, command aliases and simple
-#            functions for general use.
-#    USAGE:  Installed in the home directory as the file .bash_aliases.
-#   AUTHOR:  papamac
-#  VERSION:  1.0.9
-#     DATE:  January 7, 2025
-#
-#
-# UNLICENSE:
-#
-# This is free and unencumbered software released into the public domain.
-#
-# Anyone is free to copy, modify, publish, use, compile, sell, or distribute
-# this software, either in source code form or as a compiled binary, for any
-# purpose, commercial or non-commercial, and by any means.
-#
-# In jurisdictions that recognize copyright laws, the author or authors of this
-# software dedicate any and all copyright interest in the software to the
-# public domain. We make this dedication for the benefit of the public at large
-# and to the detriment of our heirs and successors. We intend this dedication
-# to be an overt act of relinquishment in perpetuity of all present and future
-# rights to this software under copyright law.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-#
-# DESCRIPTION:
-#
+#                                                                             #
+#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
+#     FILE:  bash_aliases                                                     #
+#    TITLE:  papamac's bash runtime environment for Raspberry Pi OS and MacOS #
+# FUNCTION:  Define common environment variables, command aliases and simple  #
+#            functions for general use.                                       #
+#    USAGE:  Installed in the home directory as the file .bash_aliases.       #
+#   AUTHOR:  papamac                                                          #
+#  VERSION:  1.0.10                                                           #
+#     DATE:  January 11, 2025                                                 #
+#                                                                             #
+#                                                                             #
+# UNLICENSE:                                                                  #
+#                                                                             #
+# This is free and unencumbered software released into the public domain.     #
+#                                                                             #
+# Anyone is free to copy, modify, publish, use, compile, sell, or distribute  #
+# this software, either in source code form or as a compiled binary, for any  #
+# purpose, commercial or non-commercial, and by any means.                    #
+#                                                                             #
+# In jurisdictions that recognize copyright laws, the author or authors of    #
+# this software dedicate any and all copyright interest in the software to    #
+# the public domain. We make this dedication for the benefit of the public at #
+# large and to the detriment of our heirs and successors. We intend this      #
+# dedication to be an overt act of relinquishment in perpetuity of all        #
+# present and future rights to this software under copyright law.             #
+#                                                                             #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  #
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,    #
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL    #
+# THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN #
+# AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN        #
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  #
+#                                                                             #
+#                                                                             #
+# DESCRIPTION:                                                                #
+#                                                                             #
 # **************************** needs work *************************************
-#
-# DEPENDENCIES/LIMITATIONS:
-#
+#                                                                             #
+#                                                                             #
+# DEPENDENCIES/LIMITATIONS:                                                   #
+#                                                                             #
 # **************************** needs work *************************************
-#
+#                                                                             #
 ###############################################################################
+
 
 ###############################################################################
 #                                                                             #
@@ -84,6 +86,7 @@ W=$'\e[47m'                             # Set background color to white.
 
 export n t d u i v k r g y b m c w K R G Y B M C W
 
+
 ###############################################################################
 #                                                                             #
 # COMMAND LINE ALIASES                                                        #
@@ -95,7 +98,10 @@ alias sudo='sudo -E'
 alias ping='sudo ping'
 alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
-alias ssd='systemctl status'
+alias restart='sudo systemctl restart'
+alias status='systemctl status'
+alias mdns-hostname='ps -ef | grep -m 1 avahi'
+
 
 ###############################################################################
 #                                                                             #
@@ -114,6 +120,7 @@ function c {
     fi
 }
 
+
 ###############################################################################
 #                                                                             #
 #    FUNCTION:  cp2bin                                                        #
@@ -128,6 +135,7 @@ function cp2bin {
     cp ${files:=*.py} ~/bin
     chmod +x ~/bin/$files
 }
+
 
 ###############################################################################
 #                                                                             #
@@ -144,19 +152,7 @@ function mv2bin {
     chmod +x ~/bin/$files
 }
 
-###############################################################################
-#                                                                             #
-#    FUNCTION:  rssd                                                          #
-#       TITLE:  restart and show status (daemon)                              #
-#    FUNCTION:  Use systemctl to restart a daemon and show its status.        #
-#       USAGE:  rssd [daemon name or service name]                            #
-#                                                                             #
-###############################################################################
 
-function rssd {
-    local daemon=$1
-    sudo systemctl restart $daemon
-    systemctl status $daemon
-}
+export -f c cp2bin mv2bin
 
-export -f c cp2bin mv2bin rssd
+mdns-hostname
