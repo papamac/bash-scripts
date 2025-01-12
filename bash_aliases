@@ -100,7 +100,8 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdns-hostname='ps -ef | grep -m 1 avahi | cut -d[ -f2 | cut -d] -f1'
+alias mdnsname='ps -ef | grep -m 1 avahi | cut -d[ -f2 | cut -d] -f1'
+alias mdnsname='avahi-resolve -a $(hostname -I' | cut -d' ' -f1) | cut -f2'
 
 
 ###############################################################################
@@ -150,6 +151,23 @@ function mv2bin {
     local files=$1
     mv ${files:=*.py} ~/bin
     chmod +x ~/bin/$files
+}
+
+
+###############################################################################
+#                                                                             #
+#    FUNCTION:  check-mdns                                                    #
+#       TITLE:  check mdns name                                               #
+#    FUNCTION:  Check to see that the mdnsname is equal to the                #
+#               hostname.local.  If not, restart the avahi-daemon and check   #
+#               again.                                                        #
+#       USAGE:  check-mdns                                                    #
+#                                                                             #
+###############################################################################
+
+function check-mdns {
+    mdnsname=$(mdnsname)
+    echo $mdnsname
 }
 
 
