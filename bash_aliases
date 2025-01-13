@@ -168,16 +168,16 @@ function check-mdns {
     echo -e "\n$g${t}check-mdns:$n $(date)"
     mdnsname=$(mdnsname)
     if [ $mdnsname == $(hostname).local ]; then
-        echo $g${t}check-mdns:$n mdns name $g$t$mdnsname$n is correct
+        echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is correct
     else
-        echo $g${t}check-mdns:$n mdns name $g$t$mdnsname$n is not the desired FQDN $g$t$(hostname).local$n
+        echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is not the desired FQDN $b$t$(hostname).local$n
         echo $g${t}check-mdns:$n restarting the avahi daemon
         restart avahi-daemon
         mdnsname=$(mdnsname)
         if [ $mdnsname == $(hostname).local ]; then
-            echo $g${t}check-mdns:$n mdns name $g$t$mdnsname$n is now correct
+            echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is now correct
         else
-            echo $g${t}check-mdns:$n mdns name $g$t$mdnsname$n is still incorrect; try rebooting
+            echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is still incorrect; try rebooting
         fi
     fi
     echo
