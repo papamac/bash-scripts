@@ -1,107 +1,114 @@
 #!/usr/bin/env bash
 ###############################################################################
-#
-#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)
-#     FILE:  p2pkg
-#    TITLE:  papamac's personal package utility (p2pkg)
-# FUNCTION:  Copy, download, clone, install, and remove papamac's packages.
-#    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]
-#            See p2pkg -h for more precise usage.
-#  OPTIONS:  See getopts comments in the script below.
-#   AUTHOR:  papamac
-#  VERSION:  1.0.11
-#     DATE:  February 7, 2024
-#
-#
-# UNLICENSE:
-#
-# This is free and unencumbered software released into the public domain.
-#
-# Anyone is free to copy, modify, publish, use, compile, sell, or distribute
-# this software, either in source code form or as a compiled binary, for any
-# purpose, commercial or non-commercial, and by any means.
-#
-# In jurisdictions that recognize copyright laws, the author or authors of this
-# software dedicate any and all copyright interest in the software to the
-# public domain. We make this dedication for the benefit of the public at large
-# and to the detriment of our heirs and successors. We intend this dedication
-# to be an overt act of relinquishment in perpetuity of all present and future
-# rights to this software under copyright law.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-#
-# DESCRIPTION:
-#
-# p2pkg optionally copies a package from a default local library
-# (p2pkg -c PACKAGE), downloads a package from a default ftp server
-# (p2pkg -f PACKAGE), or clones a package from papamac's github repository
-# (p2pkg -g PACKAGE).  Non-default sources are specified by using capital
-# letters followed by a source designator: (p2pkg -C LOCAL_LIBRARY PACKAGE),
-# (p2pkg -F FTP_SERVER PACKAGE), or (p2pkg -G GITHUB_USER PACKAGE).  By default
-# p2pkg github options clone the master branch of the github repository.  If
-# desired, another branch or tag can be cloned using the -b option,
-# (p2pkg -b BRANCH_OR_TAG -G GITHUB_USER PACKAGE).
-#
-# p2pkg copies/downloads/clones the package into a new sub-directory within src
-# directory of the current working directory.  The package name is the only
-# required positional argument and is used to both access the source package
-# to name the destination sub-directory.  Note that the package loading options
-# (-c -C, -f, -F, -g, -g) overwrite an existing package with the same name in
-# the current working directory.  There is no need to remove a package before
-# re-loading it.
-#
-# p2pkg optionally installs previously loaded package files (p2pkg -i PACKAGE),
-# removes them (p2pkg -r PACKAGE), or executes a package-unique option (p2pkg
-# -o PACKAGE).  The -i, -r, and -o options source action scripts named install,
-# remove, and option which, if implemented, must reside in the package src
-# directory.
-#
-# The (-c, -C), (-f, -F), and (-g, -G) options are mutually exclusive.  The -i,
-# -o, and -r options may be selected individually (p2pkg -i PACKAGE) or
-# combined with -c, -f, or -g (p2pkg -gio PACKAGE).  If -i, -o, and -r options
-# are selected individually they will operate on an existing package that has
-# already been loaded by p2pkg.  If a combination of options is specified, -r
-# is executed first, then -c, -f, or , -g, and finally -i and -o.
-#
-# Arguments may be passed to the package-unique action scripts by selecting -I,
-# -R, or -O followed by an argument instead of simply using -i, -r, or -o.
-# These arguments are passed to the action scripts via the variables
-# install_arg, remove_arg, and option_arg respectively.  Any positional
-# arguments following the PACKAGE name are also available to the action
-# scripts.  p2pkg sets two variables to capture these: arg is set to the first
-# positional argument following the PACKAGE name ($1) and args is set to all
-# of the positional arguments following the PACKAGE name ($*).
-#
-# p2pkg -f PACKAGE                      # Download the PACKAGE directory from
-#                                         the ftp server into a sub-directory
-#                                         named package in the src directory of
-#                                         the current working directory.
-# p2pkg -fi PACKAGE                     # Download the PACKAGE directory from
-#                                         the ftp server and install it.
-# p2pkg -r PACKAGE                      # Remove PACKAGE files and directories
-#                                         from the current working directory.
-# cd /usr/local                         # Download the PACKAGE directory from
-# sudo p2pkg -gi PACKAGE                  github and install it in /usr/local.
-#
-# cd /usr/local                         # Remove PACKAGE files and directories
-# sudo p2pkg -r PACKAGE                   from /usr/local.
-#
-#
-# DEPENDENCIES/LIMITATIONS:
-#
-# Since the p2pkg script is part of the bash-scripts package, it must be
-# bootstrapped by first installing it manually and then using the manually-
-# installed version to install the bash-scripts package.  Also, for production
-# use, p2pkg must be installed in a root-owned directory.  sudo will not
-# execute p2pkg from a user directory even if the user directory is included in
-# the execution PATH.
-#
+#                                                                             #
+#  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
+#     FILE:  p2pkg                                                            #
+#    TITLE:  papamac's personal package utility (p2pkg)                       #
+# FUNCTION:  Copy, download, clone, install, and remove papamac's packages.   #
+#    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]   #
+#            See p2pkg -h for more precise usage.                             #
+#  OPTIONS:  See getopts comments in the script below.                        #
+#   AUTHOR:  papamac                                                          #
+#  VERSION:  1.0.11                                                           #
+#     DATE:  February 7, 2024                                                 #
+#                                                                             #
+#                                                                             #
+# UNLICENSE:                                                                  #
+#                                                                             #
+# This is free and unencumbered software released into the public domain.     #
+#                                                                             #
+# Anyone is free to copy, modify, publish, use, compile, sell, or distribute  #
+# this software, either in source code form or as a compiled binary, for any  #
+# purpose, commercial or non-commercial, and by any means.                    #
+#                                                                             #
+# In jurisdictions that recognize copyright laws, the author or authors of    #
+# this software dedicate any and all copyright interest in the software to    #
+# the public domain. We make this dedication for the benefit of the public at #
+# large and to the detriment of our heirs and successors. We intend this      #
+# dedication to be an overt act of relinquishment in perpetuity of all        #
+# present and future rights to this software under copyright law.             #
+#                                                                             #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  #
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,    #
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL    #
+# THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN #
+# AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN        #
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  #
+#                                                                             #
+#                                                                             #
+# DESCRIPTION:                                                                #
+#                                                                             #
+# p2pkg optionally copies a package from a default local library              #
+# (p2pkg -c PACKAGE), downloads a package from a default ftp server           #
+# (p2pkg -f PACKAGE), or clones a package from papamac's github repository    #
+# (p2pkg -g PACKAGE).  Non-default sources are specified by using capital     #
+# letters followed by a source designator: (p2pkg -C LOCAL_LIBRARY PACKAGE),  #
+# (p2pkg -F FTP_SERVER PACKAGE), or (p2pkg -G GITHUB_USER PACKAGE).  By       #
+# default p2pkg github options clone the master branch of the github          #
+# repository.  If desired, another branch or tag can be cloned using the -b   #
+# option, (p2pkg -b BRANCH_OR_TAG -G GITHUB_USER PACKAGE).                    #
+#                                                                             #
+# p2pkg copies/downloads/clones the package into a new sub-directory within   #
+# src directory of the current working directory.  The package name is the    #
+# only required positional argument and is used to both access the source     #
+# package to name the destination sub-directory.  Note that the package       #
+# loading options (-c -C, -f, -F, -g, -g) overwrite an existing package with  #
+# the same name in the current working directory.  There is no need to remove #
+# a package before re-loading it.                                             #
+#                                                                             #
+# p2pkg optionally installs previously loaded package files (p2pkg -i         #
+# PACKAGE), removes them (p2pkg -r PACKAGE), or executes a package-unique     #
+# option (p2pkg -o PACKAGE).  The -i, -r, and -o options source action        #
+# scripts named install, remove, and option which, if implemented, must       #
+# reside in the package src directory.                                        #
+#                                                                             #
+# The (-c, -C), (-f, -F), and (-g, -G) options are mutually exclusive.  The   #
+# -i, -o, and -r options may be selected individually (p2pkg -i PACKAGE) or   #
+# combined with -c, -f, or -g (p2pkg -gio PACKAGE).  If -i, -o, and -r        #
+# options are selected individually they will operate on an existing package  #
+# that has already been loaded by p2pkg.  If a combination of options is      #
+# specified, -r is executed first, then -c, -f, or , -g, and finally -i and   #
+# -o.                                                                         #
+#                                                                             #
+# Arguments may be passed to the package-unique action scripts by selecting   #
+# -I, -R, or -O followed by an argument instead of simply using -i, -r, or    #
+# -o.  These arguments are passed to the action scripts via the variables     #
+# install_arg, remove_arg, and option_arg respectively.  Any positional       #
+# arguments following the PACKAGE name are also available to the action       #
+# scripts.  p2pkg sets two variables to capture these: arg is set to the      #
+# first positional argument following the PACKAGE name ($1) and args is set   #
+# to all of the positional arguments following the PACKAGE name ($*).  Usage  #
+# examples are as follows:                                                    #
+#                                                                             #
+# p2pkg -f PACKAGE                      # Download the PACKAGE directory from #
+#                                         the ftp server into a sub-directory #
+#                                         named package in the src directory  #
+#                                         of the current working directory.   #
+#                                                                             #
+# p2pkg -fi PACKAGE                     # Download the PACKAGE directory from #
+#                                         the ftp server and install it.      #
+#                                                                             #
+# p2pkg -r PACKAGE                      # Remove PACKAGE files and            #
+#                                         directories from the current        #
+#                                         working directory.                  #
+#                                                                             #
+# cd /usr/local                         # Download the PACKAGE directory from #
+# sudo p2pkg -gi PACKAGE                  github and install it in            #
+#                                         /usr/local.                         #
+#                                                                             #
+# cd /usr/local                         # Remove PACKAGE files and            #
+# sudo p2pkg -r PACKAGE                   directories from /usr/local.        #
+#                                                                             #
+#                                                                             #
+# DEPENDENCIES/LIMITATIONS:                                                   #
+#                                                                             #
+# Since the p2pkg script is part of the bash-scripts package, it must be      #
+# bootstrapped by first installing it manually and then using the manually-   #
+# installed version to install the bash-scripts package.  Also, for           #
+# production use, p2pkg must be installed in a root-owned directory.  sudo    #
+# will not execute p2pkg from a user directory even if the user directory is  #
+# included in the execution PATH.                                             #
+#                                                                             #
 ###############################################################################
 
 # Set xtrace option.

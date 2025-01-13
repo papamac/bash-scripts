@@ -165,8 +165,21 @@ function mv2bin {
 ###############################################################################
 
 function check-mdns {
+    echo Running check-mdns at $(date).
     mdnsname=$(mdnsname)
-    echo $mdnsname
+    if [ $mdnsname == $(hostname).local ]; then
+        echo $g${t}The mdnsname ($mdnsname) is correct.$n
+    else
+        echo $r${t}The mdnsname ($mdnsname) is not the desired FQDN ($(hostname).local).$n
+        echo Restarting the avahi daemon.
+        restart avahi-daemon
+        mdnsnsme=$(mdnsname)
+        if [ $mdnsname == $(hostname).local ]; then
+            echo $g${t}The mdnsname ($mdnsname) is now correct.$n
+        else
+            echo $r${t}The mdnsname ($mdnsname) is still incorrect.  Try rebooting.$n
+        fi
+    fi
 }
 
 
@@ -178,10 +191,5 @@ function check-mdns {
 ###############################################################################
 
 export -f c cp2bin mv2bin
-hostname
-mdnsname
-echo "$r$trestarting avahi-daemon"
-restart avahi-daemon
-mdnsname
-hostname -I
+
 check-mdns
