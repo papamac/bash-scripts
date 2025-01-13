@@ -165,7 +165,7 @@ function mv2bin {
 ###############################################################################
 
 function check-mdns {
-    echo -e '\n$g${t}check-mdns:$n $(date)'
+    echo -e "\n$g${t}check-mdns:$n $(date)"
     mdnsname=$(mdnsname)
     if [ $mdnsname == $(hostname).local ]; then
         echo $g${t}check-mdns:$n mdns name $g$t$mdnsname$n is correct
