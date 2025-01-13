@@ -100,8 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdnsname='ps -ef | grep -m 1 avahi | cut -d[ -f2 | cut -d] -f1'
-alias mdnsname='avahi-resolve -a $(hostname -I' | cut -d' ' -f1) | cut -f2'
+alias mdnsname='avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2'
 
 
 ###############################################################################
@@ -180,8 +179,9 @@ function check-mdns {
 
 export -f c cp2bin mv2bin
 hostname
-mdns-hostname
-echo 'restarting avahi-daemon'
+mdnsname
+echo "$r$trestarting avahi-daemon'
 restart avahi-daemon
-mdns-hostname
+mdnsname
 hostname -I
+check-mdns
