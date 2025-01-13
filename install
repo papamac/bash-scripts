@@ -79,7 +79,7 @@ fi
 
 # Install home files and directories.
 
-infomsg "$g${t}install:$n installing $c${t}bash_aliases$n and $b${t}bin$n in $b$t$HOME$n"
+infomsg "$g${t}install:$n installing $g${t}.bash_aliases$n and $b${t}bin$n in $b$t$HOME$n"
 cp $pkg/bash_aliases ~/.bash_aliases
 mkdir -p ~/bin
 chown_to_ref $HOME ~/.bash_aliases ~/bin

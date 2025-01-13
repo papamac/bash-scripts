@@ -165,19 +165,19 @@ function mv2bin {
 ###############################################################################
 
 function check-mdns {
-    echo Running check-mdns at $(date).
+    echo $g${t}check-mdns:$n $(date)
     mdnsname=$(mdnsname)
     if [ $mdnsname == $(hostname).local ]; then
-        echo $g${t}The mdnsname \($mdnsname\) is correct.$n
+        echo $g${t}check-mdns:$n mdnsname $y$t$mdnsname$n is correct
     else
-        echo $r${t}The mdnsname \($mdnsname\) is not the desired FQDN \($(hostname).local\).$n
-        echo Restarting the avahi daemon.
+        echo $g${t}check-mdns:$n mdnsname $y$t$mdnsname$n is not the desired FQDN $y$t$(hostname).local$n
+        echo $g${t}check-mdns:$n restarting the avahi daemon
         restart avahi-daemon
-        mdnsnsme=$(mdnsname)
+        mdnsname=$(mdnsname)
         if [ $mdnsname == $(hostname).local ]; then
-            echo $g${t}The mdnsname \($mdnsname\) is now correct.$n
+            echo $g${t}check-mdns:$n mdnsname $y$t$mdnsname$n is now correct
         else
-            echo $r${t}The mdnsname \($mdnsname\) is still incorrect.  Try rebooting.$n
+            echo $g${t}check-mdns:$n mdnsname $y$t$mdnsname$n is still incorrect; try rebooting
         fi
     fi
 }
