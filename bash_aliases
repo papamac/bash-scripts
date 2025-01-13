@@ -180,7 +180,7 @@ function check-mdns {
 export -f c cp2bin mv2bin
 hostname
 mdnsname
-echo "$r$trestarting avahi-daemon'
+echo "$r$trestarting avahi-daemon"
 restart avahi-daemon
 mdnsname
 hostname -I
