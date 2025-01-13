@@ -100,7 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdnsname='avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2'
+alias mdnsname="avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2"
 
 
 ###############################################################################
