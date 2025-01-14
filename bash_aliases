@@ -100,7 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdnsname="avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2"
+alias mDNS_hostname="avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2"
 
 
 ###############################################################################
@@ -155,29 +155,29 @@ function mv2bin {
 
 ###############################################################################
 #                                                                             #
-#    FUNCTION:  check-mdns                                                    #
-#       TITLE:  check mdns name                                               #
-#    FUNCTION:  Check to see that the mdnsname is equal to the                #
+#    FUNCTION:  check-mDNS                                                    #
+#       TITLE:  check mDNS hostname                                           #
+#    FUNCTION:  Check to see that the mDNS hostname is equal to               #
 #               hostname.local.  If not, restart the avahi-daemon and check   #
 #               again.                                                        #
-#       USAGE:  check-mdns                                                    #
+#       USAGE:  check-mDNS                                                    #
 #                                                                             #
 ###############################################################################
 
-function check-mdns {
-    echo -e "\n$g${t}check-mdns:$n $(date)"
-    mdnsname=$(mdnsname)
-    if [ $mdnsname == $(hostname).local ]; then
-        echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is correct
+function check-mDNS {
+    echo -e "\n$g${t}check-mDNS:$n $(date)"
+    mDNS_hostname=$(mDNS_hostname)
+    if [ $mDNS_hostname == $(hostname).local ]; then
+        echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is correct
     else
-        echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is not the desired FQDN $b$t$(hostname).local$n
-        echo $g${t}check-mdns:$n restarting the avahi daemon
+        echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is not equal to $b$t$(hostname).local$n
+        echo $g${t}check-mDNS:$n restarting the avahi daemon
         restart avahi-daemon
-        mdnsname=$(mdnsname)
+        mDNS_hostname=$(mDNS_hostname)
         if [ $mdnsname == $(hostname).local ]; then
-            echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is now correct
+            echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is now correct
         else
-            echo $g${t}check-mdns:$n mdns name $b$t$mdnsname$n is still incorrect; try rebooting
+            echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is still incorrect; try rebooting
         fi
     fi
     echo
