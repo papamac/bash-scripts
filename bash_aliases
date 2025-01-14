@@ -193,4 +193,4 @@ function check-mDNS {
 
 export -f c cp2bin mv2bin
 
-check-mdns
+check-mDNS
