@@ -173,7 +173,9 @@ function check-mDNS {
         echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is not equal to $b$t$(hostname).local$n
         echo $g${t}check-mDNS:$n restarting the avahi daemon
         restart avahi-daemon
+        status avahi-daemon
         mDNS_hostname=$(mDNS_hostname)
+        echo before test
         if [ $mDNS_hostname == $(hostname).local ]; then
             echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is now correct
         else
