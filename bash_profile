@@ -1,7 +1,7 @@
 # PATH settings:
 
 # PATH for ~/bin
-export PATH="~/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 
 # Alias definitions:
 
@@ -11,4 +11,3 @@ export PATH="~/bin:$PATH"
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
-

@@ -7,8 +7,8 @@
 #            functions for general use.                                       #
 #    USAGE:  Installed in the home directory as the file .bash_aliases.       #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.10                                                           #
-#     DATE:  January 11, 2025                                                 #
+#  VERSION:  1.0.11                                                           #
+#     DATE:  November 1, 2025                                                 #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -100,7 +100,8 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mDNS_hostname="avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2"
+alias mDNS_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) | cut -f2"
+alias mDNS_log="journalctl -fu avahi-daemon"
 
 
 ###############################################################################
@@ -115,7 +116,7 @@ alias mDNS_hostname="avahi-resolve -a $(hostname -I | cut -d' ' -f1) | cut -f2"
 
 function c {
     local dir=$1
-    if cd $dir; then
+    if cd "$dir"; then
         ls -lah
     fi
 }
@@ -132,8 +133,8 @@ function c {
 
 function cp2bin {
     local files=$1
-    cp ${files:=*.py} ~/bin
-    chmod +x ~/bin/$files
+    cp "${files:=*.py}" ~/bin
+    chmod +x ~/bin/"$files"
 }
 
 
@@ -148,8 +149,8 @@ function cp2bin {
 
 function mv2bin {
     local files=$1
-    mv ${files:=*.py} ~/bin
-    chmod +x ~/bin/$files
+    mv "${files:=*.py}" ~/bin
+    chmod +x ~/bin/"$files"
 }
 
 
@@ -165,17 +166,17 @@ function mv2bin {
 ###############################################################################
 
 function check-mDNS {
-    echo -e $g${t}check-mDNS:$n $(date)
+    echo -e "$g${t}check-mDNS:$n" "$(date)"
     mDNS_hostname=$(mDNS_hostname)
     if [[ $mDNS_hostname == $(hostname).local ]]; then
-        echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is correct
+        echo "$g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n" is correct
     else
-        echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n not equal to $b$t$(hostname).local$n
-        echo $g${t}check-mDNS:$n restarting the avahi daemon
+        echo "$g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is not equal to $b$t$(hostname).local$n"
+        echo "$g${t}check-mDNS:$n restarting the avahi daemon"
         restart avahi-daemon
         mDNS_hostname=$(mDNS_hostname)
         if [[ $mDNS_hostname == $(hostname).local ]]; then
-            echo $g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is now correct
+            echo "$g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is now correct"
         else
             echo "$g${t}check-mDNS:$n mDNS hostname $b$t$mDNS_hostname$n is still incorrect; try rebooting"
         fi
@@ -191,5 +192,3 @@ function check-mDNS {
 ###############################################################################
 
 export -f c cp2bin mv2bin check-mDNS
-
-check-mDNS
