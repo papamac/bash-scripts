@@ -167,17 +167,17 @@ function mv2bin {
 ###############################################################################
 
 function check-mdns {
-    echo -n "$g${t}check-mdns:$n $(date)"
+    echo -n "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S')"
     mdns_hostname=$(mdns_hostname)
     if [[ -z $mdns_hostname ]]; then
-        echo " resolution failed $b$t$(hostname -I | cut -d' ' -f1)$n"
-        echo-e "$g${t}check-mdns:$n consider rebooting\n"
+        echo " address resolution failed $b$t$(hostname -I | cut -d' ' -f1)$n"
+        echo-e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
     else
         if [[ $mdns_hostname == $(hostname).local ]]; then
             echo " $b$t$mdns_hostname$n"
         else
             echo " hostname conflict $b$t$mdns_hostname$n"
-            echo -e "$g${t}check-mdns:$n restarting avahi-daemon\n"
+            echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') restarting avahi-daemon\n"
             restart avahi-daemon
         fi
     fi
