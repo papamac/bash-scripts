@@ -171,7 +171,7 @@ function check-mdns {
     mdns_hostname=$(mdns_hostname)
     if [[ -z $mdns_hostname ]]; then
         echo " address resolution failed $b$t$(hostname -I | cut -d' ' -f1)$n"
-        echo-e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
+        echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
     else
         if [[ $mdns_hostname == $(hostname).local ]]; then
             echo " $b$t$mdns_hostname$n"
