@@ -103,7 +103,7 @@ alias status='systemctl status'
 alias mdns_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) | cut -f2"
 alias show="journalctl -fu"
 alias show-mdns="show avahi-daemon"
-alias monitor-mdns="while sleep 60; do check-mdns; done"
+alias monitor-mdns="check-mdns; while sleep 60; do check-mdns; done"
 
 
 ###############################################################################
