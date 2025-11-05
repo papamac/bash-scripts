@@ -172,9 +172,8 @@ function check-mdns {
     if [[ $mdns_hostname == $(hostname).local ]]; then
         echo " $b$t$mdns_hostname$n"
     else
-        echo " $b$t$mdns_hostname$n mDNS hostname conflict; restarting avahi-daemon"
+        echo " $b$t$mdns_hostname$n mDNS hostname conflict; restarting"
         restart avahi-daemon
-        echo
     fi
 }
 
