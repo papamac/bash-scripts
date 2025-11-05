@@ -100,7 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdns_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) | cut -f2"
+alias mdns_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) 2> /dev/null | cut -f2"
 alias show="journalctl -fu"
 alias show-mdns="show avahi-daemon"
 alias monitor-mdns="check-mdns; while sleep 60; do check-mdns; done"
@@ -167,13 +167,19 @@ function mv2bin {
 ###############################################################################
 
 function check-mdns {
-    echo -en "$g${t}check-mdns:$n $(date)"
+    echo -n "$g${t}check-mdns:$n $(date)"
     mdns_hostname=$(mdns_hostname)
-    if [[ $mdns_hostname == $(hostname).local ]]; then
-        echo " $b$t$mdns_hostname$n"
+    if [[ -z $mdns_hostname ]]; then
+        echo " resolution failed $b$t$(hostname -I | cut -d' ' -f1)$n"
+        echo-e "$g${t}check-mdns:$n consider rebooting\n"
     else
-        echo " $b$t$mdns_hostname$n hostname conflict; restarting"
-        restart avahi-daemon
+        if [[ $mdns_hostname == $(hostname).local ]]; then
+            echo " $b$t$mdns_hostname$n"
+        else
+            echo " hostname conflict $b$t$mdns_hostname$n"
+            echo -e "$g${t}check-mdns:$n restarting avahi-daemon\n"
+            restart avahi-daemon
+        fi
     fi
 }
 
