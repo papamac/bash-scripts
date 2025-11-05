@@ -101,8 +101,9 @@ alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
 alias mdns_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) | cut -f2"
-alias mdns_log="journalctl -fu avahi-daemon"
 alias show="journalctl -fu"
+alias show-mdns="show avahi-daemon"
+alias monitor-mdns="while sleep 60; do check-mdns; done"
 
 
 ###############################################################################
@@ -160,27 +161,20 @@ function mv2bin {
 #    FUNCTION:  check-mdns                                                    #
 #       TITLE:  check mdns hostname                                           #
 #    FUNCTION:  Check to see that the mdns hostname is equal to               #
-#               hostname.local.  If not, restart the avahi-daemon and check   #
-#               again.                                                        #
+#               hostname.local.  If not, restart the avahi-daemon             #
 #       USAGE:  check-mdns                                                    #
 #                                                                             #
 ###############################################################################
 
 function check-mdns {
-    echo -e "$g${t}check-mdns:$n" "$(date)"
+    echo -en "$g${t}check-mdns:$n $(date)"
     mdns_hostname=$(mdns_hostname)
     if [[ $mdns_hostname == $(hostname).local ]]; then
-        echo "$g${t}check-mdns:$n mdns hostname $b$t$mdns_hostname$n" is correct
+        echo " $b$t$mdns_hostname$n"
     else
-        echo "$g${t}check-mdns:$n mdns hostname $b$t$mdns_hostname$n is not equal to $b$t$(hostname).local$n"
-        echo "$g${t}check-mdns:$n restarting the avahi daemon"
+        echo " $b$t$mdns_hostname$n mDNS hostname conflict; restarting avahi-daemon"
         restart avahi-daemon
-        mdns_hostname=$(mdns_hostname)
-        if [[ $mdns_hostname == $(hostname).local ]]; then
-            echo "$g${t}check-mdns:$n mdns hostname $b$t$mdns_hostname$n is now correct"
-        else
-            echo "$g${t}check-mdns:$n mdns hostname $b$t$mdns_hostname$n is still incorrect; try rebooting"
-        fi
+        echo
     fi
 }
 
