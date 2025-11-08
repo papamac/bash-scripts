@@ -132,168 +132,63 @@ usage: p2pkg [-h] |
 
 function errmsg { echo "$r$t$script: $1$n" >&2; }
 function infomsg { echo "$g$t$script:$n $1"; }
-function echo_exit { echo; exit $1; }
-
-function ok_to_continue {
-    echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
-    read
-    if [[ $REPLY != 'Y' ]]; then
-        errmsg 'aborted'
-        echo_exit 1
-    fi
-}
-
-function chown_to_ref {                 # Change the owner:group of the targets
-    declare -a lsd="($(ls -ld $1))"       # ($2-$6) to that of the reference ($1)
-    chown -R "${lsd[2]}:${lsd[3]} $2 $3 $4 $5 $6"
-}
-
-function source_action_script {         # Conditionally source package-unique
-    action=$1                           # action scripts.
-    if [[ $action ]]; then
-        if [[ -d $pkg ]]; then
-            action_script=$pkg/$action
-            if [[ -f $action_script ]]; then
-                source $action_script
-            else
-                errmsg "$action_script: file not found"
-                echo_exit 2
-            fi
-        else
-            errmsg "$pkg: directory not found"
-            echo_exit 3
-        fi
-    fi
-}
+function echo_exit { echo; exit "$1"; }
 
 # Parse options and set action variables.
 
-while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
+while getopts 'aA:chlmM:nN:r46?' opt; do
     case $opt in
-        b) branch="-b $OPTARG" ;;       # Define branch/tag option for the git
-#                                         clone in the github option.
-        c) cpy=cpy ;;                   # Copy the package directory from a
-#                                         local library to the src directory
-#                                         of the current working directory.
-        C) cpy=cpy                      # Same as c, but set cpy_lib.
-           cpy_lib=$OPTARG ;;
-        f) ftp=ftp ;;                   # Download the package directory from
-#                                         the ftp server to the src directory
-#                                         of the current working directory.
-        F) ftp=ftp                      # Same as f, but set the ftp_dir.
-           ftp_dir=$OPTARG ;;
-        g) git=git ;;                   # Download the package directory from
-#                                         the github server to the src
-#                                         directory of the current working
-#                                         directory.
-        G) git=git                      # Same as g, but set the github_usr.
-           github_usr=$OPTARG ;;
-        h) echo "$usage"                # Help.
-           exit 0 ;;
-        i) install=install              # Execute the package install script.
-           install_arg= ;;
-        I) install=install              # Same as i, but include an argument.
-           install_arg=$OPTARG ;;
-        o) option=option                # Execute the package option script.
-           option_arg= ;;
-        O) option=option                # Same as o, but include an argument.
-           option_arg=$OPTARG ;;
-        r) remove=remove                # Execute the package remove script.
-           remove_arg= ;;
-        R) remove=remove                # Same as r, but include sn argument.
-           remove_arg=$OPTARG ;;
-        ?) echo "$usage"
-           exit 4 ;;
+        a) ;;
+        A) host_address=$OPTARG ;;
+        c) check=check ;;
+        h) echo "$usage" ; exit 0 ;;
+        l) log=log ;;
+        m) monitor=monitor ;;
+        M) monitor=monitor; interval=$OPTARG ;;
+        n) name=name ;;
+        N) name=name; hostname=$OPTARG ;;
+        r) resolve=resolve ;;
+        4) ipv=4 ;;
+        6) ipv=6 ;;
+        ?) echo "$usage" ; exit 4 ;;
     esac
 done
-shift $(($OPTIND - 1))
-pkg_name=$1                             # Package name used by the ftp server
-#                                         or the github server (may be upper
-#                                         case).
-shift 1                                 # Reset argument numbering for the
-#                                         action scripts.
-arg=$1
-args=$*
 
-if [[ ! $pkg_name ]]; then
-    errmsg 'no package specified'
-    echo_exit 5
-fi
-if [[ ! $cpy$ftp$git$install$option$remove ]]; then
+if [[ -z $check$log$monitor$resolve ]]; then
     errmsg 'no options specified'
-    echo_exit 6
+    echo_exit 1
 fi
-
-# Verify operation in the current working directory.
-
-echo
-ok_to_continue "working in $b$t$PWD$n"
-
-# Define variables for use in this script and sourced action scripts.
-
-pkg_name_lower=${pkg_name,,}            # pkg_name may be upper or mixed case.
-bin=$PWD/bin                            # bin directory for executables.
-src=$PWD/src                            # src directory for downloads.
-pkg=$src/$pkg_name_lower                # Package directory in the src
-#                                         directory.
-
-# If remove was selected, do it first.
-
-source_action_script $remove
 
 # Optionally copy files from a local directory, download them from an ftp
 # server, or download them from github.
 
-if [[ $cpy ]]; then
-    cpy_lib=${cpy_lib:-/Volumes/mac-pro-share/krause/papamac}
-    cpy_path=$cpy_lib/$pkg_name
-    if [[ ! -d $cpy_path ]]; then
-        errmsg "cpy: $cpy_path: library not found"
-        echo_exit 7
-    fi
-    infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
-    mkdir -p $pkg
-    cp $cpy_path/* $pkg
-    chown_to_ref $PWD $src
+if [[ -n $resolve ]]; then
 
-elif [[ $ftp ]]; then
-    ftp_usr=${FTP_USR:-papamac}         # ftp account username.
-    ftp_pwd=${FTP_PWD:-papa2352}        # ftp account password.
-    ftp_url=${FTP_URL:-ftps://mac-pro.local:2121}  # ftp server URL.
-    ftp_dir=${ftp_dir:-papamac}         # ftp package directory.
-    ftp_path=$ftp_url/$ftp_dir/$pkg_name
-    wget_opts='-qrR .DS_Store -nH --cut-dirs=2 --check-certificate=quiet'
-    wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
-    exclude_list="$ftp_dir/$pkg_name/.*"
-    infomsg "downloading $b$t$ftp_path$n to $b$t$pkg$n"
-    wget $wget_opts -X $exclude_list -P $pkg $ftp_path
-    exit_status=$?
-    if [[ $exit_status != 0 ]]; then
-        errmsg "wget: $pkg_name: download error ($exit_status)"
-        rm -fr $pkg
-        echo_exit 8
-    fi
-    chown_to_ref $PWD $src
+    if [[ -n $name ]]; then
+        if [[ -z $hostname ]]; then
+            hostname=$HOSTNAME
+        fi
+        host_addresses="avahi-resolve -n$ipv $hostname 2> /dev/null"
+        exit_code=$?
+        if [[ -z $exit_code ]]; then
+            infomsg "host addresses are $b$t$host_addresses$n"
+        else
+            errmsg "could not resolve $b$t$hostname$n ($exit_code)"
+            error_exit 2
+        fi
 
-elif [[ $git ]]; then
-    rm -fr $pkg
-    github_usr=${github_usr:-papamac}       # github account username.
-    git_url=${GIT_URL:-https://github.com}  # github server URL.
-    git_path=$git_url/$github_usr/$pkg_name
-    infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone $branch $git_path $pkg
-    exit_status=$?
-    if [[ $exit_status != 0 ]]; then
-        errmsg "git: $pkg_name: download error ($exit_status)"
-        rm -fr $pkg
-        echo_exit 9
+    else
+        if [[ -z $host_address ]]; then
+            host_address="$(hostname -I | cut -d' ' -f1)"
+        fi
+        mdns_hostname="avahi-resolve -a $host_address 2> /dev/null | cut -f2"
+        exit_code=$?
+        if [[ -z $exit_code ]]; then
+            infomsg "mDNS hostname is $b$t$mdns_hostname$n"
+        else
+            errmsg "could not resolve $b$t$host_address$n ($r$t$exit_code$n)"
+            error_exit 3
+        fi
     fi
-    rm -fr $pkg/.[!.]*
-    chown_to_ref $PWD $src
 fi
-
-# Optionally execute install and option action bash-scripts in the correct order.
-
-source_action_script $install
-source_action_script $option
 echo_exit 0

@@ -70,6 +70,16 @@
 #                                                                             #
 ###############################################################################
 
+# Define local variables and functions.
+
+function install {
+    infomsg "$g${t}install:$n installing $g$t$1$n in $b$t$bin$n"
+chmod +x $pkg/$1
+mkdir -p $bin
+ln -fs $pkg/$1 $bin
+chown_to_ref $PWD $bin
+}
+
 # Check for valid HOME directory.
 
 if [[ $HOME == "/root" ]]; then
@@ -84,10 +94,7 @@ cp $pkg/bash_aliases ~/.bash_aliases
 mkdir -p ~/bin
 chown_to_ref $HOME ~/.bash_aliases ~/bin
 
-# Install the p2pkg script.
+# Install the mdns and p2pkg scripts.
 
-infomsg "$g${t}install:$n installing $g${t}p2pkg$n in $b$t$bin$n"
-chmod +x $pkg/p2pkg
-mkdir -p $bin
-ln -fs $pkg/p2pkg $bin
-chown_to_ref $PWD $bin
+install mdns
+install p2pkg
