@@ -169,7 +169,7 @@ if [[ -n $resolve ]]; then
             hostname=$HOSTNAME
         fi
         mdns_hostname=$hostname.local
-        host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname")
+        host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname | cut -f2")
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
             infomsg "$b$t$mdns_hostname$n --> $b$t$host_addresses$n"
