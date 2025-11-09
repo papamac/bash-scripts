@@ -158,7 +158,7 @@ if [[ -z $addr$check$log$monitor$name ]]; then
     echo_exit 1
 fi
 
-if [[ -n $adddr ]]; then  # Resolve a host address to a mDNS hostname.
+if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
     if [[ -z $host_address ]]; then
             host_address="$(hostname -I | cut -d' ' -f1)"
         fi
