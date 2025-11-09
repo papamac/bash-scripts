@@ -72,11 +72,6 @@
 
 # Define local variables and functions.
 
-function chown_to_ref {                 # Change the owner:group of the targets
-    declare -a lsd="($(ls -ld $1))"       # ($2-$6) to that of the reference ($1)
-    chown -R "${lsd[2]}:${lsd[3]} $2 $3 $4 $5 $6"
-}
-
 function install {
     infomsg "$g${t}install:$n installing $g$t$1$n in $b$t$bin$n"
 chmod +x $pkg/$1
