@@ -136,7 +136,7 @@ function echo_exit { echo; exit "$1"; }
 
 # Parse options and set action variables.
 
-while getopts 'aA:chlmM:nN:r46?' opt; do
+while getopts 'aA:chlmM:nN:46?' opt; do
     case $opt in
         a) addr=addr ;;
         A) addr=addr; host_address=$OPTARG ;;
@@ -154,7 +154,7 @@ while getopts 'aA:chlmM:nN:r46?' opt; do
 done
 
 if [[ -z $addr$check$log$monitor$name ]]; then
-    errmsg 'no options specified'
+    errmsg 'no option specified'
     echo_exit 1
 fi
 
@@ -164,9 +164,9 @@ if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
         fi
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -n $mdns_hostname ]]; then
-        infomsg "$host_address --> $b$t$mdns_hostname$n"
+        infomsg "$y$t$host_address$n --> $y$t$mdns_hostname$n"
     else
-        errmsg "failed to resolve $host_address"
+        errmsg "failed to resolve $y$t$host_address$n"
         echo_exit 2
     fi
 
@@ -177,9 +177,9 @@ elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
     mdns_hostname=$hostname.local
     host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname" | cut -f2)
     if [[ -n $host_addresses ]]; then
-        infomsg "$mdns_hostname --> $b$t$host_addresses$n"
+        infomsg "$y$t$mdns_hostname$n --> $y$t$host_addresses$n"
     else
-        errmsg "failed to resolve $mdns_hostname"
+        errmsg "failed to resolve $y$t$mdns_hostname$n"
         echo_exit 3
     fi
 fi
