@@ -169,14 +169,13 @@ if [[ -n $resolve ]]; then
             hostname=$HOSTNAME
         fi
         mdns_hostname=$hostname.local
-        infomsg "$mdns_hostname"
-        host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname")
+        host_addresses=$(avahi-resolve -n"$ipv $mdns_hostname")
         exit_code=$?
         errmsg $exit_code
-        if [[ -n $host_address ]]; then
+        if [[ -n $host_addresses ]]; then
             infomsg "$b$t$mdns_hostname$n --> $b$t$host_addresses$n"
         else
-            errmsg "could not resolve $b$t$mdns_hostname$n"
+            errmsg "failed to resolve $b$t$mdns_hostname$n"
             echo_exit 2
         fi
 
@@ -190,7 +189,7 @@ if [[ -n $resolve ]]; then
         if [[ -n $mdns_hostname ]]; then
             infomsg "$b$t$host_address$n --> $b$t$mdns_hostname$n"
         else
-            errmsg "could not resolve ($exit_code) $b$t$host_address$n"
+            errmsg "failed to resolve ($exit_code) $b$t$host_address$n"
             echo_exit 3
         fi
     fi
