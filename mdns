@@ -169,7 +169,7 @@ if [[ -n $resolve ]]; then
             hostname=$HOSTNAME
         fi
         mdns_hostname=$hostname.local
-        host_addresses="$(avahi-resolve -n$ipv $mdns_hostname)"
+        host_addresses=$(avahi-resolve -n$ipv $mdns_hostname)
         exit_code=$?
         errmsg $exit_code
         if [[ -n $host_address ]]; then
