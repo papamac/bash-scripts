@@ -138,8 +138,8 @@ function echo_exit { echo; exit "$1"; }
 
 while getopts 'aA:chlmM:nN:r46?' opt; do
     case $opt in
-        a) ;;
-        A) host_address=$OPTARG ;;
+        a) addr=addr ;;
+        A) addr=addr; host_address=$OPTARG ;;
         c) check=check ;;
         h) echo "$usage" ; exit 0 ;;
         l) log=log ;;
@@ -147,50 +147,41 @@ while getopts 'aA:chlmM:nN:r46?' opt; do
         M) monitor=monitor; interval=$OPTARG ;;
         n) name=name ;;
         N) name=name; hostname=$OPTARG ;;
-        r) resolve=resolve ;;
         4) ipv=4 ;;
         6) ipv=6 ;;
         ?) echo "$usage" ; exit 4 ;;
     esac
 done
 
-if [[ -z $check$log$monitor$resolve ]]; then
+if [[ -z $addr$check$log$monitor$name ]]; then
     errmsg 'no options specified'
     echo_exit 1
 fi
 
-# Optionally copy files from a local directory, download them from an ftp
-# server, or download them from github.
-
-if [[ -n $resolve ]]; then
-
-    if [[ -n $name ]]; then
-        if [[ -z $hostname ]]; then
-            hostname=$HOSTNAME
-        fi
-        mdns_hostname=$hostname.local
-        host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname" | cut -f2)
-        exit_code=$?
-        if [[ $exit_code == 0 ]]; then
-            infomsg "$b$t$mdns_hostname$n --> $b$t$host_addresses$n"
-        else
-            errmsg "failed to resolve $b$t$mdns_hostname$n"
-            echo_exit 2
-        fi
-
-    else  # Not -n; default to -a.
-        if [[ -z $host_address ]]; then
+if [[ -n $adddr ]]; then  # Resolve a host address to a mDNS hostname.
+    if [[ -z $host_address ]]; then
             host_address="$(hostname -I | cut -d' ' -f1)"
         fi
-        mdns_hostname="$(avahi-resolve -a $host_address | cut -f2)"
-        exit_code=$?
-        errmsg $exit_code
-        if [[ $exit_code == 0 ]]; then
-            infomsg "$b$t$host_address$n --> $b$t$mdns_hostname$n"
-        else
-            errmsg "failed to resolve ($exit_code) $b$t$host_address$n"
-            echo_exit 3
-        fi
+    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+    if [[ -n $mdns_hostname ]]; then
+        infomsg "$host_address --> $b$t$mdns_hostname$n"
+    else
+        errmsg "failed to resolve $host_address"
+        echo_exit 2
+    fi
+
+elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
+    if [[ -z $hostname ]]; then
+        hostname=$HOSTNAME
+    fi
+    mdns_hostname=$hostname.local
+    host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname" | cut -f2)
+    if [[ -n $host_addresses ]]; then
+        infomsg "$mdns_hostname --> $b$t$host_addresses$n"
+    else
+        errmsg "failed to resolve $mdns_hostname"
+        echo_exit 3
     fi
 fi
+
 echo_exit 0
