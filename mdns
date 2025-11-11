@@ -119,18 +119,21 @@ fi
 
 # Define local variables and functions.
 
-script=${0##*/}                         # Script name.
+script=${0##*/}  # Script name.
+# shellcheck disable=SC2154
+prefix="$g$t$script:$n "
 usage="\
 usage: p2pkg [-h] |
              [[[-c | -C cpy_lib] |
              [-f | -F ftp_dir] |
-             [[-b branch][-g | -G github_usr]]
              [-i | -I install_arg]
              [-o | -O option_arg]
              [-r | -R remove_arg]
              package_name [argument...]]"
 
+# shellcheck disable=SC2154
 function errmsg { echo "$r$t$script: $1$n" >&2; }
+# shellcheck disable=SC2154
 function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit "$1"; }
 
@@ -141,8 +144,9 @@ while getopts 'aA:chlmM:nN:46?' opt; do
         a) addr=addr ;;
         A) addr=addr; host_address=$OPTARG ;;
         c) check=check ;;
-        h) echo "$usage" ; exit 0 ;;
-        l) log=log ;;
+        h) echo "$usage"; exit 0 ;;
+        l) log=log;
+           journalctl -fu avahi-daemon ;;
         m) monitor=monitor ;;
         M) monitor=monitor; interval=$OPTARG ;;
         n) name=name ;;
@@ -155,32 +159,47 @@ done
 
 if [[ -z $addr$check$log$monitor$name ]]; then
     errmsg 'no option specified'
+    echo "$usage"
     echo_exit 1
 fi
 
+ if [[ -n $check ]]; then
+    host_address="$(hostname -I | cut -d' ' -f1)"
+    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+    if [[ -z $mdns_hostname ]]; then
+        # shellcheck disable=SC2154
+        echo " failed to resolve $b$t$(hostname -I | cut -d' ' -f1)$n"
+        echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
+    else
+        if [[ $mdns_hostname == $(hostname).local ]]; then
+            echo " $b$t$mdns_hostname$n"
+        else
+            echo " hostname conflict $b$t$mdns_hostname$n"
+            echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') restarting avahi-daemon\n"
+            restart avahi-daemon
+        fi
+    fi
+fi
+
 if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
+    echo -n "$prefix"
     if [[ -z $host_address ]]; then
             host_address="$(hostname -I | cut -d' ' -f1)"
         fi
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -n $mdns_hostname ]]; then
-        infomsg "$y$t$host_address$n --> $y$t$mdns_hostname$n"
-    else
-        errmsg "failed to resolve $y$t$host_address$n"
-        echo_exit 2
+        # shellcheck disable=SC2154
+        echo "$host_address --> $y$t$mdns_hostname$n"
     fi
 
 elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
+    echo -n "$prefix"
     if [[ -z $hostname ]]; then
-        hostname=$HOSTNAME
+        hostname=$HOSTNAME.local
     fi
-    mdns_hostname=$hostname.local
-    host_addresses=$(avahi-resolve -n"$ipv" "$mdns_hostname" | cut -f2)
+    host_addresses=$(avahi-resolve -n"$ipv $hostname" | cut -f2)
     if [[ -n $host_addresses ]]; then
-        infomsg "$y$t$mdns_hostname$n --> $y$t$host_addresses$n"
-    else
-        errmsg "failed to resolve $y$t$mdns_hostname$n"
-        echo_exit 3
+        infomsg "$mdns_hostname --> $y$t$host_addresses$n"
     fi
 fi
 
