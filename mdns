@@ -130,12 +130,10 @@ usage: p2pkg [-h] |
              [-r | -R remove_arg]
              package_name [argument...]]"
 
+function dt { date +'%b %d %I:%M:%S'; }
+
 function check {
-    if [[ $1 == 'date' ]]; then
-        p="$(date +'%b %d %I:%M:%S') $prefix"
-    else
-        p=$prefix
-    fi
+    p=$1$prefix
     echo -n "$p"
     host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
@@ -143,19 +141,14 @@ function check {
         echo "${p}Consider rebooting"
     else
         if [[ $mdns_hostname != $(hostname).local ]]; then
-            # shellcheck disable=SC2154
-            echo "Hostname conflict $y$t$mdns_hostname$n"
+            echo "Hostname conflict $b$t$mdns_hostname$n"
             echo "${p}Restarting avahi-daemon"
             sudo systemctl restart avahi-daemon
             mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
             echo -n "$p"
         fi
-        echo "$host_address --> $y$t$mdns_hostname$n"
+        echo "$host_address --> $b$t$mdns_hostname$n"
     fi
-}
-
-function monitor {
-    while sleep 60; do check; done
 }
 
 # Parse options and set action variables.
@@ -167,8 +160,8 @@ while getopts 'aA:chlmM:nN:46?' opt; do
         c) check; exit ;;
         h) echo "$usage" ; exit ;;
         l) journalctl -fu avahi-daemon; exit ;;
-        m) while sleep 60; do check date; done; exit ;;
-        M) while sleep "$OPTARG"; do check date; done; exit ;;
+        m) check "$(dt)"; while sleep 60; do check "$(dt)"; done; exit ;;
+        M) check "$(dt)"; while sleep "$OPTARG"; do check "$(dt)"; done; exit ;;
         n) name=name ;;
         N) name=name; hostname=$OPTARG ;;
         4) ipv=4 ;;
@@ -177,12 +170,6 @@ while getopts 'aA:chlmM:nN:46?' opt; do
     esac
 done
 
-if [[ -z $addr$name ]]; then
-    echo "${prefix}No option specified"
-    echo "$usage"
-    exit
-fi
-
 if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
     echo -n "$prefix"
     if [[ -z $host_address ]]; then
@@ -190,7 +177,7 @@ if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
         fi
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -n $mdns_hostname ]]; then
-        echo "$host_address --> $y$t$mdns_hostname$n"
+        echo "$host_address --> $b$t$mdns_hostname$n"
     fi
 
 elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
@@ -200,6 +187,10 @@ elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
     fi
     host_addresses=$(avahi-resolve -n"$ipv" "$hostname" | cut -f2)
     if [[ -n $host_addresses ]]; then
-        echo "$hostname --> $y$t$host_addresses$n"
+        echo "$hostname --> $b$t$host_addresses$n"
     fi
+
+else
+    echo "${prefix}No option specified"
+    echo "$usage"
 fi
