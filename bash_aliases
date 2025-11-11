@@ -191,4 +191,4 @@ function check-mdns {
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin check-mdns
+export -f c cp2bin mv2bin check-mdns restart

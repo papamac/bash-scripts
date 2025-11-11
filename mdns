@@ -173,7 +173,7 @@ fi
         if [[ $mdns_hostname == $(hostname).local ]]; then
             echo "$host_address --> $y$t$mdns_hostname$n"
         else
-            echo " Hostname conflict $y$t$mdns_hostname$n"
+            echo "Hostname conflict $y$t$mdns_hostname$n"
             echo "${prefix}Restarting avahi-daemon"
             restart avahi-daemon
         fi
