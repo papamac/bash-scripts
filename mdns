@@ -120,7 +120,6 @@ fi
 # Define local variables and functions.
 
 script=${0##*/}  # Script name.
-# shellcheck disable=SC2154
 prefix="$g$t$script:$n "
 usage="\
 usage: p2pkg [-h] |
@@ -131,11 +130,24 @@ usage: p2pkg [-h] |
              [-r | -R remove_arg]
              package_name [argument...]]"
 
-# shellcheck disable=SC2154
-function errmsg { echo "$r$t$script: $1$n" >&2; }
-# shellcheck disable=SC2154
-function infomsg { echo "$g$t$script:$n $1"; }
-function echo_exit { echo; exit "$1"; }
+function check {
+    echo -n "$prefix"
+    host_address="$(hostname -I | cut -d' ' -f1)"
+    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+    if [[ -z $mdns_hostname ]]; then
+        echo "${prefix}Consider rebooting"
+    else
+        if [[ $mdns_hostname != $(hostname).local ]]; then
+            # shellcheck disable=SC2154
+            echo "Hostname conflict $y$t$mdns_hostname$n"
+            echo "${prefix}Restarting avahi-daemon"
+            sudo systemctl restart avahi-daemon
+            mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+            echo -n "$prefix"
+        fi
+        echo "$host_address --> $y$t$mdns_hostname$n"
+    fi
+}
 
 # Parse options and set action variables.
 
@@ -143,24 +155,23 @@ while getopts 'aA:chlmM:nN:46?' opt; do
     case $opt in
         a) addr=addr ;;
         A) addr=addr; host_address=$OPTARG ;;
-        c) check=check ;;
-        h) echo "$usage"; exit 0 ;;
-        l) log=log;
-           journalctl -fu avahi-daemon ;;
+        c) check; exit ;;
+        h) echo "$usage"; exit ;;
+        l) journalctl -fu avahi-daemon ;;
         m) monitor=monitor ;;
         M) monitor=monitor; interval=$OPTARG ;;
         n) name=name ;;
         N) name=name; hostname=$OPTARG ;;
         4) ipv=4 ;;
         6) ipv=6 ;;
-        ?) echo "$usage" ; exit 4 ;;
+        ?) echo "$usage" ; exit ;;
     esac
 done
 
 if [[ -z $addr$check$log$monitor$name ]]; then
     errmsg 'no option specified'
     echo "$usage"
-    echo_exit 1
+    exit
 fi
 
  if [[ -n $check ]]; then
