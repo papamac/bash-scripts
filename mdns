@@ -133,7 +133,7 @@ usage: p2pkg [-h] |
 function dt { date +'%b %d %I:%M:%S '; }
 
 function check {
-    p=1$prefix
+    p=$1$prefix
     echo -n "$p"
     host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
