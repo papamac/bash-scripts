@@ -7,8 +7,8 @@
 #            functions for general use.                                       #
 #    USAGE:  Installed in the home directory as the file .bash_aliases.       #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.11                                                           #
-#     DATE:  November 1, 2025                                                 #
+#  VERSION:  1.0.12                                                           #
+#     DATE:  November 11, 2025                                                #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -44,7 +44,6 @@
 # **************************** needs work *************************************
 #                                                                             #
 ###############################################################################
-
 
 ###############################################################################
 #                                                                             #
@@ -86,7 +85,6 @@ W=$'\e[47m'                             # Set background color to white.
 
 export n t d u i v k r g y b m c w K R G Y B M C W
 
-
 ###############################################################################
 #                                                                             #
 # COMMAND LINE ALIASES                                                        #
@@ -100,11 +98,6 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias mdns_hostname="avahi-resolve -a \$(hostname -I | cut -d' ' -f1) 2> /dev/null | cut -f2"
-alias show="journalctl -fu"
-alias show-mdns="show avahi-daemon"
-alias monitor-mdns="check-mdns; while sleep 60; do check-mdns; done"
-
 
 ###############################################################################
 #                                                                             #
@@ -123,7 +116,6 @@ function c {
     fi
 }
 
-
 ###############################################################################
 #                                                                             #
 #    FUNCTION:  cp2bin                                                        #
@@ -138,7 +130,6 @@ function cp2bin {
     cp "${files:=*.py}" ~/bin
     chmod +x ~/bin/"$files"
 }
-
 
 ###############################################################################
 #                                                                             #
@@ -155,35 +146,6 @@ function mv2bin {
     chmod +x ~/bin/"$files"
 }
 
-
-###############################################################################
-#                                                                             #
-#    FUNCTION:  check-mdns                                                    #
-#       TITLE:  check mdns hostname                                           #
-#    FUNCTION:  Check to see that the mdns hostname is equal to               #
-#               hostname.local.  If not, restart the avahi-daemon             #
-#       USAGE:  check-mdns                                                    #
-#                                                                             #
-###############################################################################
-
-function check-mdns {
-    echo -n "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S')"
-    mdns_hostname=$(mdns_hostname)
-    if [[ -z $mdns_hostname ]]; then
-        echo " address resolution failed $b$t$(hostname -I | cut -d' ' -f1)$n"
-        echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
-    else
-        if [[ $mdns_hostname == $(hostname).local ]]; then
-            echo " $b$t$mdns_hostname$n"
-        else
-            echo " hostname conflict $b$t$mdns_hostname$n"
-            echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') restarting avahi-daemon\n"
-            restart avahi-daemon
-        fi
-    fi
-}
-
-
 ###############################################################################
 #                                                                             #
 #                            Startup Script for                               #
@@ -191,4 +153,4 @@ function check-mdns {
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin check-mdns restart
+export -f c cp2bin mv2bin

@@ -122,17 +122,19 @@ fi
 script=${0##*/}  # Script name.
 prefix="$g$t$script:$n "
 usage="\
-usage: p2pkg [-h] |
-             [[[-c | -C cpy_lib] |
-             [-f | -F ftp_dir] |
-             [-i | -I install_arg]
-             [-o | -O option_arg]
-             [-r | -R remove_arg]
-             package_name [argument...]]"
+usage: mdns [-h] | [-?] |              # Help.
+            [-a | -A host_address] |   # Resolve host address to mDNS hostname.
+            [-c] |                     # Check mDNS hostname == hostname.local.
+            [-l] |                     # Display mDNS (avahi-daemon) log.
+            [-m | -M mDNS_hostname] |  # Monitor mDNS hostname changes.
+            [-n | -N mDNS_hostname] |  # Resolve mDNS hostname to host addresses.
+            [-4 | -6]                  # Show only IPv4 or IPv6 addresses
+                                       # (must precede -n or -N options)"
 
-function dt { date +'%b %d %I:%M:%S '; }
+function dt { date +'%b %d %I:%M:%S '; }  # Return the current date and time.
 
-function check {
+function check {  # Check to see that the mDNS hostname is equal to
+                  # hostname.local.  If not, restart the avahi-daemon.
     p=$1$prefix
     echo -n "$p"
     host_address="$(hostname -I | cut -d' ' -f1)"
@@ -192,27 +194,5 @@ while getopts 'aA:chlmM:nN:46?' opt; do
     esac
 done
 
-if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
-    echo -n "$prefix"
-    if [[ -z $host_address ]]; then
-            host_address="$(hostname -I | cut -d' ' -f1)"
-        fi
-    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
-    if [[ -n $mdns_hostname ]]; then
-        echo "$host_address --> $b$t$mdns_hostname$n"
-    fi
-
-elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
-    echo -n "$prefix"
-    if [[ -z $hostname ]]; then
-        hostname=$HOSTNAME.local
-    fi
-    host_addresses=$(avahi-resolve -n"$ipv" "$hostname" | cut -f2)
-    if [[ -n $host_addresses ]]; then
-        echo "$hostname --> $b$t$host_addresses$n"
-    fi
-
-else
-    echo "${prefix}No option specified"
-    echo "$usage"
-fi
+echo "${prefix}No option specified"
+echo "$usage"
