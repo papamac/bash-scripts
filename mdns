@@ -155,7 +155,7 @@ function check {
 
 while getopts 'aA:chlmM:nN:46?' opt; do
     case $opt in
-        a) addr=addr ;;
+        a) echo "$ipv" ; exit ;;
         A) addr=addr; host_address=$OPTARG ;;
         c) check; exit ;;
         h) echo "$usage" ; exit ;;
