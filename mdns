@@ -197,10 +197,8 @@ elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
     if [[ -z $hostname ]]; then
         hostname=$HOSTNAME.local
     fi
-    host_addresses=$(avahi-resolve -n"$ipv $hostname" | cut -f2)
+    host_addresses=$(avahi-resolve -n"$ipv" "$hostname" | cut -f2)
     if [[ -n $host_addresses ]]; then
         infomsg "$mdns_hostname --> $y$t$host_addresses$n"
     fi
 fi
-
-echo_exit 0
