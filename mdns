@@ -131,7 +131,7 @@ usage: p2pkg [-h] |
              package_name [argument...]]"
 
 function check {
-    if [[ $1 == 'd' ]]; then
+    if [[ $1 == 'date' ]]; then
         p="$(date +'%b %d %I:%M:%S') $prefix"
     else
         p=$prefix
@@ -167,8 +167,8 @@ while getopts 'aA:chlmM:nN:46?' opt; do
         c) check; exit ;;
         h) echo "$usage" ; exit ;;
         l) journalctl -fu avahi-daemon; exit ;;
-        m) check 'd' ;;
-        M) monitor=monitor; interval=$OPTARG ;;
+        m) while sleep 60; do check date; done; exit ;;
+        M) while sleep "$OPTARG"; do check date; done; exit ;;
         n) name=name ;;
         N) name=name; hostname=$OPTARG ;;
         4) ipv=4 ;;
@@ -177,7 +177,7 @@ while getopts 'aA:chlmM:nN:46?' opt; do
     esac
 done
 
-if [[ -z $addr$monitor$name ]]; then
+if [[ -z $addr$name ]]; then
     echo "${prefix}No option specified"
     echo "$usage"
     exit
