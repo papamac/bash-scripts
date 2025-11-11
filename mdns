@@ -164,18 +164,18 @@ if [[ -z $addr$check$log$monitor$name ]]; then
 fi
 
  if [[ -n $check ]]; then
+    echo -n "$prefix"
     host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -z $mdns_hostname ]]; then
-        # shellcheck disable=SC2154
-        echo " failed to resolve $b$t$(hostname -I | cut -d' ' -f1)$n"
+        echo "$prefix consider rebooting"
         echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') consider rebooting\n"
     else
         if [[ $mdns_hostname == $(hostname).local ]]; then
-            echo " $b$t$mdns_hostname$n"
+            echo "$host_address --> $y$t$mdns_hostname$n"
         else
-            echo " hostname conflict $b$t$mdns_hostname$n"
-            echo -e "$g${t}check-mdns:$n $(date +'%b %d %I:%M:%S') restarting avahi-daemon\n"
+            echo " hostname conflict $y$t$mdns_hostname$n"
+            echo "${prefix}restarting avahi-daemon"
             restart avahi-daemon
         fi
     fi
@@ -188,7 +188,6 @@ if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
         fi
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -n $mdns_hostname ]]; then
-        # shellcheck disable=SC2154
         echo "$host_address --> $y$t$mdns_hostname$n"
     fi
 
@@ -202,3 +201,5 @@ elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
         echo "$hostname --> $y$t$host_addresses$n"
     fi
 fi
+
+echo
