@@ -170,13 +170,14 @@ fi
     if [[ -z $mdns_hostname ]]; then
         echo "{$prefix}Consider rebooting"
     else
-        if [[ $mdns_hostname == $(hostname).local ]]; then
-            echo "$host_address --> $y$t$mdns_hostname$n"
-        else
+        if [[ $mdns_hostname != $(hostname).local ]]; then
             echo "Hostname conflict $y$t$mdns_hostname$n"
             echo "${prefix}Restarting avahi-daemon"
-            restart avahi-daemon
+            sudo systemctl restart avahi-daemon
+            mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+            echo -n "$prefix"
         fi
+        echo "$host_address --> $y$t$mdns_hostname$n"
     fi
 fi
 
