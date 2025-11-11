@@ -131,22 +131,31 @@ usage: p2pkg [-h] |
              package_name [argument...]]"
 
 function check {
-    echo -n "$prefix"
+    if [[ $1 == 'd' ]]; then
+        p="$(date +'%b %d %I:%M:%S') $prefix"
+    else
+        p=$prefix
+    fi
+    echo -n "$p"
     host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -z $mdns_hostname ]]; then
-        echo "${prefix}Consider rebooting"
+        echo "${p}Consider rebooting"
     else
         if [[ $mdns_hostname != $(hostname).local ]]; then
             # shellcheck disable=SC2154
             echo "Hostname conflict $y$t$mdns_hostname$n"
-            echo "${prefix}Restarting avahi-daemon"
+            echo "${p}Restarting avahi-daemon"
             sudo systemctl restart avahi-daemon
             mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
-            echo -n "$prefix"
+            echo -n "$p"
         fi
         echo "$host_address --> $y$t$mdns_hostname$n"
     fi
+}
+
+function monitor {
+    while sleep 60; do check; done
 }
 
 # Parse options and set action variables.
@@ -156,40 +165,22 @@ while getopts 'aA:chlmM:nN:46?' opt; do
         a) addr=addr ;;
         A) addr=addr; host_address=$OPTARG ;;
         c) check; exit ;;
-        h) echo "$usage"; exit ;;
-        l) journalctl -fu avahi-daemon ;;
-        m) monitor=monitor ;;
+        h) echo "$usage" ; exit ;;
+        l) journalctl -fu avahi-daemon; exit ;;
+        m) check 'd' ;;
         M) monitor=monitor; interval=$OPTARG ;;
         n) name=name ;;
         N) name=name; hostname=$OPTARG ;;
         4) ipv=4 ;;
         6) ipv=6 ;;
-        ?) echo "$usage" ; exit ;;
+        ?) echo "$usage"; exit ;;
     esac
 done
 
-if [[ -z $addr$check$log$monitor$name ]]; then
-    errmsg 'no option specified'
+if [[ -z $addr$monitor$name ]]; then
+    echo "${prefix}No option specified"
     echo "$usage"
     exit
-fi
-
- if [[ -n $check ]]; then
-    echo -n "$prefix"
-    host_address="$(hostname -I | cut -d' ' -f1)"
-    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
-    if [[ -z $mdns_hostname ]]; then
-        echo "${prefix}Consider rebooting"
-    else
-        if [[ $mdns_hostname != $(hostname).local ]]; then
-            echo "Hostname conflict $y$t$mdns_hostname$n"
-            echo "${prefix}Restarting avahi-daemon"
-            sudo systemctl restart avahi-daemon
-            mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
-            echo -n "$prefix"
-        fi
-        echo "$host_address --> $y$t$mdns_hostname$n"
-    fi
 fi
 
 if [[ -n $addr ]]; then  # Resolve a host address to a mDNS hostname.
@@ -212,5 +203,3 @@ elif [[ -n $name ]]; then  # Resolve a mDNS hostname to one or more addresses.
         echo "$hostname --> $y$t$host_addresses$n"
     fi
 fi
-
-echo
