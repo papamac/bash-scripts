@@ -151,19 +151,41 @@ function check {
     fi
 }
 
-# Parse options and set action variables.
+function resolve_address {  # Resolve a host address to a mDNS hostname.
+    echo -n "$prefix"
+    if [[ -z $host_address ]]; then
+            host_address="$(hostname -I | cut -d' ' -f1)"
+        fi
+    mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+    if [[ -n $mdns_hostname ]]; then
+        echo "$host_address --> $b$t$mdns_hostname$n"
+    fi
+}
 
-while getopts '46aA:chlmM:nN:?' opt; do
+function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
+    echo -n "$prefix"
+    if [[ -z $hostname ]]; then
+        hostname=$HOSTNAME.local
+    fi
+    host_addresses=$(avahi-resolve -n"$ipv" "$hostname" | cut -f2)
+    if [[ -n $host_addresses ]]; then
+        echo "$hostname --> $b$t$host_addresses$n"
+    fi
+}
+
+# Parse options and execute actions.
+
+while getopts 'aA:chlmM:nN:46?' opt; do
     case $opt in
-        a) echo "$ipv" ; exit ;;
-        A) addr=addr; host_address=$OPTARG ;;
+        a) resolve_address; exit ;;
+        A) host_address=$OPTARG; resolve_address; exit ;;
         c) check; exit ;;
         h) echo "$usage" ; exit ;;
         l) journalctl -fu avahi-daemon; exit ;;
         m) check "$(dt)"; while sleep 60; do check "$(dt)"; done; exit ;;
         M) check "$(dt)"; while sleep "$OPTARG"; do check "$(dt)"; done; exit ;;
-        n) name=name ;;
-        N) name=name; hostname=$OPTARG ;;
+        n) resolve_hostname; exit ;;
+        N) hostname=$OPTARG; resolve_hostname; exit;;
         4) ipv=4 ;;
         6) ipv=6 ;;
         ?) echo "$usage"; exit ;;
