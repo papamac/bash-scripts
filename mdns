@@ -119,17 +119,19 @@ fi
 
 # Define local variables and functions.
 
-script=${0##*/}  # Script name.
-prefix="$g$t$script:$n "
-usage="\
-usage: mdns [-h] | [-?] |              # Help.
-            [-a | -A host_address] |   # Resolve host address to mDNS hostname.
-            [-c] |                     # Check mDNS hostname == hostname.local.
-            [-l] |                     # Display mDNS (avahi-daemon) log.
-            [-m | -M mDNS_hostname] |  # Monitor mDNS hostname changes.
-            [-n | -N mDNS_hostname] |  # Resolve mDNS hostname to host addresses.
-            [-4 | -6]                  # Show only IPv4 or IPv6 addresses
-                                       # (must precede -n or -N options)"
+arg=$1                             # mdns script argument.
+script=${0##*/}                    # Script name.
+prefix="$g$t$script:$n "           # Message prefix.
+usage="\usage:
+mdns -a <host address>             Resolve host address to mDNS hostname.
+mdns <-4 | -6> -n <mDNS hostname>  Resolve mDNS hostname to host addresses.
+mdns -c                            Check mDNS hostname == hostname.local.
+mdns <-d delay> -m <host address>  Monitor mDNS hostname changes.
+mdns -l                            Display mDNS (avahi-daemon) log.
+
+-4 --> lookup only IPv4 addresses in mDNS hostname resolution.
+-6 --> lookup only IPv6 addresses in mDNS hostname resolution.
+delay is the delay time in seconds for mDNS hostname change monitoring."
 
 function dt { date +'%b %d %I:%M:%S '; }  # Return the current date and time.
 
@@ -155,6 +157,7 @@ function check {  # Check to see that the mDNS hostname is equal to
 
 function resolve_address {  # Resolve a host address to a mDNS hostname.
     echo -n "$prefix"
+    host_address=$arg
     if [[ -z $host_address ]]; then
             host_address="$(hostname -I | cut -d' ' -f1)"
         fi
@@ -166,6 +169,7 @@ function resolve_address {  # Resolve a host address to a mDNS hostname.
 
 function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
     echo -n "$prefix"
+    hostname=$arg
     if [[ -z $hostname ]]; then
         hostname=$HOSTNAME.local
     fi
@@ -177,22 +181,21 @@ function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
 
 # Parse options and execute actions.
 
-while getopts 'aA:chlmM:nN:46?' opt; do
+delay=60  # Default monitoring delay is 60 seconds.
+while getopts 'acd:hlmn46?' opt; do
     case $opt in
         a) resolve_address; exit ;;
-        A) host_address=$OPTARG; resolve_address; exit ;;
         c) check; exit ;;
+        d) delay=$OPTARG ;;
         h) echo "$usage" ; exit ;;
         l) journalctl -fu avahi-daemon; exit ;;
-        m) check "$(dt)"; while sleep 60; do check "$(dt)"; done; exit ;;
-        M) check "$(dt)"; while sleep "$OPTARG"; do check "$(dt)"; done; exit ;;
+        m) check "$(dt)"; while sleep "$delay"; do check "$(dt)"; done; exit ;;
         n) resolve_hostname; exit ;;
-        N) hostname=$OPTARG; resolve_hostname; exit;;
         4) ipv=4 ;;
         6) ipv=6 ;;
         ?) echo "$usage"; exit ;;
     esac
 done
 
-echo "${prefix}No option specified"
+echo "${prefix}No action selected"
 echo "$usage"
