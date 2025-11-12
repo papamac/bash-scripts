@@ -111,27 +111,22 @@
 #                                                                             #
 ###############################################################################
 
-# Set xtrace option.
-
-if [[ $XTRACE ]]; then
-    set -x
-fi
-
 # Define local variables and functions.
 
-arg=$1                             # mdns script argument.
-script=${0##*/}                    # Script name.
-prefix="$g$t$script:$n "           # Message prefix.
+arg=$1                                # mdns script argument.
+script=${0##*/}                       # Script name.
+prefix="$g$t$script:$n "              # Message prefix.
+
 usage="
-mdns -a <host address>             Resolve host address to mDNS hostname.
-mdns <-4 | -6> -n <mDNS hostname>  Resolve mDNS hostname to host addresses.
-mdns -c                            Check mDNS hostname == hostname.local.
-mdns <-d delay> -m <host address>  Monitor mDNS hostname changes.
-mdns -l                            Display mDNS (avahi-daemon) log.
+mdns -a <host address>                Resolve host address to mDNS hostname.
+mdns <-4 | -6> -n <mDNS hostname>     Resolve mDNS hostname to host addresses.
+mdns -c                               Check mDNS hostname == hostname.local.
+mdns <-i interval> -m <host address>  Continuously monitor mDNS hostname.
+mdns -l                               Display mDNS (avahi-daemon) log.
 
 -4 --> lookup only IPv4 addresses in mDNS hostname resolution.
 -6 --> lookup only IPv6 addresses in mDNS hostname resolution.
-delay is the delay time in seconds for mDNS hostname change monitoring."
+interval is the time period in seconds for mDNS hostname monitoring."
 
 function dt { date +'%b %d %I:%M:%S '; }  # Return the current date and time.
 
@@ -181,15 +176,16 @@ function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
 
 # Parse options and execute actions.
 
-delay=60  # Default monitoring delay is 60 seconds.
-while getopts 'acd:hlmn46?' opt; do
+interval=60  # Default monitoring interval is 60 seconds.
+while getopts 'achi:lmn46?' opt; do
     case $opt in
         a) resolve_address; exit ;;
         c) check; exit ;;
-        d) delay=$OPTARG ;;
         h) echo "$usage" ; exit ;;
+        i) interval=$OPTARG ;;
         l) journalctl -fu avahi-daemon; exit ;;
-        m) check "$(dt)"; while sleep "$delay"; do check "$(dt)"; done; exit ;;
+        m) check "$(dt)";
+           while sleep "$interval"; do check "$(dt)"; done; exit ;;
         n) resolve_hostname; exit ;;
         4) ipv=4 ;;
         6) ipv=6 ;;
