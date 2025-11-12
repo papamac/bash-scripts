@@ -178,8 +178,8 @@ function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
 interval=60  # Default monitoring interval is 60 seconds.
 while getopts 'achi:lmn46?' opt; do
     optind=$OPTIND
-    nextopt=${!$OPTIND}
-    echo "${prefix}opt=$opt optind=$OPTIND nextopt=$nextopt"
+    arg=${!optind}
+    echo "${prefix}opt=$opt optind=$OPTIND nextopt=$arg"
     case $opt in
         a) resolve_address; exit ;;
         c) check; exit ;;
