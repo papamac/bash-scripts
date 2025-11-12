@@ -192,6 +192,7 @@ while getopts 'achi:lmn46?' opt; do
         6) ipv=6 ;;
         ?) echo "$usage"; exit ;;
     esac
+    echo "${prefix}opt=$opt optind=$OPTIND"
 done
 
 echo "${prefix}No action selected"
