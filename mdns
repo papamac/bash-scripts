@@ -152,7 +152,7 @@ function check {  # Check to see that the mDNS hostname is equal to
 
 function resolve_address {  # Resolve a host address to a mDNS hostname.
     echo -n "$prefix"
-    host_address=$arg
+    # host_address=$arg
     if [[ -z $host_address ]]; then
             host_address="$(hostname -I | cut -d' ' -f1)"
         fi
