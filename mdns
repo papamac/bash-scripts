@@ -185,7 +185,8 @@ while getopts 'achi:lmn46?' opt; do
         h) echo "$usage" ; exit ;;
         i) interval=$OPTARG ;;
         l) journalctl -fu avahi-daemon; exit ;;
-        m) check "$(dt)";
+        m) echo "${prefix}opt=$opt optind=$OPTIND"
+           check "$(dt)";
            while sleep "$interval"; do check "$(dt)"; done; exit ;;
         n) resolve_hostname; exit ;;
         4) ipv=4 ;;
