@@ -122,7 +122,7 @@ fi
 arg=$1                             # mdns script argument.
 script=${0##*/}                    # Script name.
 prefix="$g$t$script:$n "           # Message prefix.
-usage="\usage:
+usage="
 mdns -a <host address>             Resolve host address to mDNS hostname.
 mdns <-4 | -6> -n <mDNS hostname>  Resolve mDNS hostname to host addresses.
 mdns -c                            Check mDNS hostname == hostname.local.
