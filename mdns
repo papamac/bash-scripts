@@ -116,6 +116,7 @@
 arg=$1                                # mdns script argument.
 script=${0##*/}                       # Script name.
 prefix="$g$t$script:$n "              # Message prefix.
+echo "${prefix}arg=$arg"
 
 usage="
 mdns -a <host address>                Resolve host address to mDNS hostname.
