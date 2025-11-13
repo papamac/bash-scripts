@@ -133,10 +133,7 @@ function check {  # Check to see that the mDNS hostname is equal to
                   # hostname.local.  If not, restart the avahi-daemon.
     p=$1$prefix
     echo -n "$p"
-    host_address=$arg
-    if [[ -z $host_address ]]; then
-            host_address="$(hostname -I | cut -d' ' -f1)"
-        fi
+    host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -z $mdns_hostname ]]; then
         echo "${p}Consider rebooting"
