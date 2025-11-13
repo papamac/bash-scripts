@@ -8,8 +8,8 @@
 #    USAGE:  source src/bash-scripts/install or p2pkg -i bash-scripts (see    #
 #            examples below).                                                 #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.8                                                            #
-#     DATE:  December 26, 2023                                                #
+#  VERSION:  1.0.9                                                            #
+#     DATE:  November 13, 2025                                                #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -76,10 +76,10 @@
 
 function install {
     infomsg "$g${t}install:$n installing $g$t$1$n in $b$t$bin$n"
-chmod +x $pkg/$1
-mkdir -p $bin
-ln -fs $pkg/$1 $bin
-chown_to_ref $PWD $bin
+    chmod +x "$pkg/$1"
+    mkdir -p "$bin"
+    ln -fs "$pkg/$1" "$bin"
+    chown_to_ref "$PWD" "$bin"
 }
 
 # Check for valid HOME directory.
@@ -91,10 +91,10 @@ fi
 
 # Install home files and directories.
 
-infomsg "$g${t}install:$n installing $g${t}.bash_aliases$n and $b${t}bin$n in $b$t$HOME$n"
-cp $pkg/bash_aliases ~/.bash_aliases
+infomsg "$g${t}install:$n installing .bash_aliases and $b${t}bin$n in $b$t$HOME$n"
+cp "$pkg"/bash_aliases ~/.bash_aliases
 mkdir -p ~/bin
-chown_to_ref $HOME ~/.bash_aliases ~/bin
+chown_to_ref "$HOME" ~/.bash_aliases ~/bin
 
 # Install the mdns and p2pkg scripts.
 
