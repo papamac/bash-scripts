@@ -137,8 +137,8 @@ function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit $1; }
 
 function chown_to_ref {                 # Change the owner:group of the targets
-    declare -a lsd=($(ls -ld $1))       # ($2-$6) to that of the reference ($1)
-    chown -R ${lsd[2]}:${lsd[3]} $2 $3 $4 $5 $6
+    declare -a lsd=("$(ls -ld "$1")")   # ($2-$6) to that of the reference ($1)
+    chown -R "${lsd[2]}:${lsd[3]}" "$2" "$3" "$4" "$5" "$6"
 }
 
 function ok_to_continue {
@@ -156,7 +156,7 @@ function source_action_script {         # Conditionally source package-unique
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
             if [[ -f $action_script ]]; then
-                source $action_script
+                source "$action_script"
             else
                 errmsg "$action_script: file not found"
                 echo_exit 2
@@ -208,7 +208,7 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
            exit 4 ;;
     esac
 done
-shift $(($OPTIND - 1))
+shift $OPTIND - 1
 pkg_name=$1                             # Package name used by the ftp server
 #                                         or the github server (may be upper
 #                                         case).

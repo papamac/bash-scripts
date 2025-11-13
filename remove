@@ -72,8 +72,8 @@ fi
 # Remove bash-scripts files and directories from the current working directory.
 
 infomsg "$g${t}remove:$n removing bash-scripts files and directories from $b$t$PWD$n"
-rm $bin/p2pkg
-rm -r $pkg
+rm "$bin"/p2pkg
+rm -r "$pkg"
 
 # Remove home file and directories.
 
