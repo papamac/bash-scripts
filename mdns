@@ -2,15 +2,16 @@
 ###############################################################################
 #                                                                             #
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
-#     FILE:  p2pkg                                                            #
-#    TITLE:  papamac's personal package utility (p2pkg)                       #
-# FUNCTION:  Copy, download, clone, install, and remove papamac's packages.   #
-#    USAGE:  [sudo -E] p2pkg [[-option]..[-option]] package_name [argument]   #
-#            See p2pkg -h for more precise usage.                             #
-#  OPTIONS:  See getopts comments in the script below.                        #
+#     FILE:  mdns                                                             #
+#    TITLE:  papamac's multicast DNS (mDNS) utility                           #
+# FUNCTION:  Resolve host addresses and mDNS hostnames, check for correct     #
+#            mDNS hostnames, and display mDNS system log.                     #
+#    USAGE:  mdns [-option] [-action] [host address | mDNS hostname]          #
+#            See mdns -h for more precise usage.                              #
+#  OPTIONS:  See getopts code in the script below.                            #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.11                                                           #
-#     DATE:  February 7, 2024                                                 #
+#  VERSION:  1.0.0                                                            #
+#     DATE:  FNovember 13, 2025                                               #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -35,97 +36,30 @@
 # AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN        #
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  #
 #                                                                             #
+# For more information, please refer to <https://unlicense.org/>              #
+#                                                                             #
 #                                                                             #
 # DESCRIPTION:                                                                #
 #                                                                             #
-# p2pkg optionally copies a package from a default local library              #
-# (p2pkg -c PACKAGE), downloads a package from a default ftp server           #
-# (p2pkg -f PACKAGE), or clones a package from papamac's github repository    #
-# (p2pkg -g PACKAGE).  Non-default sources are specified by using capital     #
-# letters followed by a source designator: (p2pkg -C LOCAL_LIBRARY PACKAGE),  #
-# (p2pkg -F FTP_SERVER PACKAGE), or (p2pkg -G GITHUB_USER PACKAGE).  By       #
-# default p2pkg github options clone the master branch of the github          #
-# repository.  If desired, another branch or tag can be cloned using the -b   #
-# option, (p2pkg -b BRANCH_OR_TAG -G GITHUB_USER PACKAGE).                    #
-#                                                                             #
-# p2pkg copies/downloads/clones the package into a new sub-directory within   #
-# src directory of the current working directory.  The package name is the    #
-# only required positional argument and is used to both access the source     #
-# package to name the destination sub-directory.  Note that the package       #
-# loading options (-c -C, -f, -F, -g, -g) overwrite an existing package with  #
-# the same name in the current working directory.  There is no need to remove #
-# a package before re-loading it.                                             #
-#                                                                             #
-# p2pkg optionally installs previously loaded package files (p2pkg -i         #
-# PACKAGE), removes them (p2pkg -r PACKAGE), or executes a package-unique     #
-# option (p2pkg -o PACKAGE).  The -i, -r, and -o options source action        #
-# scripts named install, remove, and option which, if implemented, must       #
-# reside in the package src directory.                                        #
-#                                                                             #
-# The (-c, -C), (-f, -F), and (-g, -G) options are mutually exclusive.  The   #
-# -i, -o, and -r options may be selected individually (p2pkg -i PACKAGE) or   #
-# combined with -c, -f, or -g (p2pkg -gio PACKAGE).  If -i, -o, and -r        #
-# options are selected individually they will operate on an existing package  #
-# that has already been loaded by p2pkg.  If a combination of options is      #
-# specified, -r is executed first, then -c, -f, or , -g, and finally -i and   #
-# -o.                                                                         #
-#                                                                             #
-# Arguments may be passed to the package-unique action scripts by selecting   #
-# -I, -R, or -O followed by an argument instead of simply using -i, -r, or    #
-# -o.  These arguments are passed to the action scripts via the variables     #
-# install_arg, remove_arg, and option_arg respectively.  Any positional       #
-# arguments following the PACKAGE name are also available to the action       #
-# scripts.  p2pkg sets two variables to capture these: arg is set to the      #
-# first positional argument following the PACKAGE name ($1) and args is set   #
-# to all of the positional arguments following the PACKAGE name ($*).  Usage  #
-# examples are as follows:                                                    #
-#                                                                             #
-# p2pkg -f PACKAGE                      # Download the PACKAGE directory from #
-#                                         the ftp server into a sub-directory #
-#                                         named package in the src directory  #
-#                                         of the current working directory.   #
-#                                                                             #
-# p2pkg -fi PACKAGE                     # Download the PACKAGE directory from #
-#                                         the ftp server and install it.      #
-#                                                                             #
-# p2pkg -r PACKAGE                      # Remove PACKAGE files and            #
-#                                         directories from the current        #
-#                                         working directory.                  #
-#                                                                             #
-# cd /usr/local                         # Download the PACKAGE directory from #
-# sudo p2pkg -gi PACKAGE                  github and install it in            #
-#                                         /usr/local.                         #
-#                                                                             #
-# cd /usr/local                         # Remove PACKAGE files and            #
-# sudo p2pkg -r PACKAGE                   directories from /usr/local.        #
-#                                                                             #
-#                                                                             #
-# DEPENDENCIES/LIMITATIONS:                                                   #
-#                                                                             #
-# Since the p2pkg script is part of the bash-scripts package, it must be      #
-# bootstrapped by first installing it manually and then using the manually-   #
-# installed version to install the bash-scripts package.  Also, for           #
-# production use, p2pkg must be installed in a root-owned directory.  sudo    #
-# will not execute p2pkg from a user directory even if the user directory is  #
-# included in the execution PATH.                                             #
+# Needs work.                                                                 #
 #                                                                             #
 ###############################################################################
 
 # Define local variables and functions.
-                               # mdns script argument.
+
 script=${0##*/}                       # Script name.
 prefix="$g$t$script:$n "              # Message prefix.
 
-usage="
-mdns -a <host address>                Resolve host address to mDNS hostname.
-mdns <-4 | -6> -n <mDNS hostname>     Resolve mDNS hostname to host addresses.
-mdns -c                               Check mDNS hostname == hostname.local.
-mdns <-i interval> -m <host address>  Continuously monitor mDNS hostname.
-mdns -l                               Display mDNS (avahi-daemon) log.
+usage="mdns [-h | -?]                     Display this help.
+mdns -a [host address]             Resolve host address to mDNS hostname.
+mdns [-4 | -6] -n [mDNS hostname]  Resolve mDNS hostname to host addresses.
+mdns -c                            Check mDNS hostname == hostname.local.
+mdns [-i interval] -m              Monitor (check) mDNS hostname on interval.
+mdns -l                            Display mDNS (avahi-daemon) log.
 
 -4 --> lookup only IPv4 addresses in mDNS hostname resolution.
 -6 --> lookup only IPv6 addresses in mDNS hostname resolution.
-interval is the time period in seconds for mDNS hostname monitoring."
+interval is the time interval in seconds for mDNS hostname monitoring."
 
 function dt { date +'%b %d %I:%M:%S '; }  # Return the current date and time.
 
@@ -138,14 +72,18 @@ function check {  # Check to see that the mDNS hostname is equal to
     if [[ -z $mdns_hostname ]]; then
         echo "${p}Consider rebooting"
     else
-        if [[ $mdns_hostname != $(hostname).local ]]; then
+        if [[ $mdns_hostname == $(hostname).local ]]; then
+            echo "$host_address --> $b$t$mdns_hostname$n"
+        else
             echo "Hostname conflict $b$t$mdns_hostname$n"
             echo "${p}Restarting avahi-daemon"
             sudo systemctl restart avahi-daemon
-            mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
             echo -n "$p"
+            mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
+            if [[ -n $mdns_hostname ]]; then
+                echo "$host_address --> $b$t$mdns_hostname$n"
+            fi
         fi
-        echo "$host_address --> $b$t$mdns_hostname$n"
     fi
 }
 
@@ -178,8 +116,7 @@ function resolve_hostname {  # Resolve a mDNS hostname to one or more addresses.
 interval=60  # Default monitoring interval is 60 seconds.
 while getopts 'achi:lmn46?' opt; do
     optind=$OPTIND
-    arg=${!optind}
-    echo "${prefix}opt=$opt optind=$OPTIND nextopt=$arg"
+    arg=${!optind}  # Capture the next argument for use in resolve functions.
     case $opt in
         a) resolve_address; exit ;;
         c) check; exit ;;
