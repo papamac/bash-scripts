@@ -136,9 +136,9 @@ function errmsg { echo "$r$t$script: $1$n" >&2; }
 function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit $1; }
 
-function chown_to_ref {                 # Change the owner:group of the targets
-    declare -a lsd=("$(ls -ld "$1")")   # ($2-$6) to that of the reference ($1)
-    chown -R "${lsd[2]}:${lsd[3]}" "$2" "$3" "$4" "$5" "$6"
+function chown_to_ref {                 # Change the owner:group of the target
+    declare -a lsd=("$(ls -ld "$1")")   # ($2) to that of the reference ($1)
+    chown -R "${lsd[2]}:${lsd[3]}" "$2"
 }
 
 function ok_to_continue {
@@ -208,7 +208,7 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
            exit 4 ;;
     esac
 done
-shift $OPTIND - 1
+shift $((OPTIND - 1))
 pkg_name=$1                             # Package name used by the ftp server
 #                                         or the github server (may be upper
 #                                         case).
