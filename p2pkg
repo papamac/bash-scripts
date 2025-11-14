@@ -276,13 +276,13 @@ elif [[ -n $ftp ]]; then
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "wget: $pkg_name: download error ($exit_status)"
-        rm -fr "$pkg"
+        rm -rf "$pkg"
         echo_exit 8
     fi
     chown_to_ref "$PWD" "$src"
 
 elif [[ -n $git ]]; then
-    rm -fr "$pkg"
+    rm -rf "$pkg"
     github_usr=${github_usr:-papamac}       # github account username.
     git_url=${GIT_URL:-https://github.com}  # github server URL.
     git_path=$git_url/$github_usr/$pkg_name
@@ -291,10 +291,10 @@ elif [[ -n $git ]]; then
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
-        rm -fr "$pkg"
+        rm -rf "$pkg"
         echo_exit 9
     fi
-    rm -fr "$pkg"/.[!.]*
+    rm -rf "$pkg"/.[!.]*
     chown_to_ref "$PWD" "$src"
 fi
 

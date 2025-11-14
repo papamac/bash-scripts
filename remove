@@ -74,11 +74,9 @@ fi
 infomsg "$g${t}remove:$n removing bash-scripts files and directories from $b$t$PWD$n"
 rm -f "$bin"/mdns "$bin"/p2pkg
 rmdir --ignore-fail-on-non-empty "$bin"
-rm -rf "$pkg"
-rmdir --ignore-fail-on-non-empty "$src"
+rm -rf "$pkg" "$src"
 
 # Remove home file and directories.
 
 infomsg "$g${t}remove:$n removing home files and directories from $b$t$HOME$n"
-rm -f ~/.bash_aliases
-rmdir --ignore-fail-on-non-empty ~/bin
+rm -rf ~/.bash_aliases ~/bin
