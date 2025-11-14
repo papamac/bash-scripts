@@ -119,10 +119,6 @@ if [[ -n $XTRACE ]]; then
     set -x
 fi
 
-# Export variables that are optionally used by sourced scripts.
-
-export install_arg, option_arg, remove_arg, arg, args, bin
-
 # Define local variables and functions.
 
 script=${0##*/}                         # Script name.
@@ -287,7 +283,7 @@ elif [[ -n $git ]]; then
     git_url=${GIT_URL:-https://github.com}  # github server URL.
     git_path=$git_url/$github_usr/$pkg_name
     infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone "$branch" "$git_path" "$pkg"
+    git clone $branch "$git_path" "$pkg"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
@@ -300,6 +296,7 @@ fi
 
 # Optionally execute install and option action bash-scripts in the correct order.
 
+export install_arg, option_arg, remove_arg, arg, args, bin
 source_action_script "$install"
 source_action_script "$option"
 echo_exit 0
