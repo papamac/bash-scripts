@@ -138,7 +138,7 @@ function echo_exit { echo; exit "$1"; }
 
 function chown_to_ref {                 # Change the owner:group of the targets
     declare -a lsd=("$(ls -ld "$1")")   # ($2-$6) to that of the reference ($1)
-    chown -R "${lsd[2]}:${lsd[3]}" "$2 $3 $4 $5 $6"
+    chown -R "${lsd[2]}:${lsd[3]}" $2 $3 $4 $5 $6
 }
 
 function ok_to_continue {
@@ -296,7 +296,7 @@ fi
 
 # Optionally execute install and option action bash-scripts in the correct order.
 
-export install_arg, option_arg, remove_arg, arg, args, bin
+export install_arg option_arg remove_arg arg args bin
 source_action_script "$install"
 source_action_script "$option"
 echo_exit 0
