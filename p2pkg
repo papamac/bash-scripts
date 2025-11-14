@@ -9,8 +9,8 @@
 #            See p2pkg -h for more precise usage.                             #
 #  OPTIONS:  See getopts comments in the script below.                        #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.11                                                           #
-#     DATE:  February 7, 2024                                                 #
+#  VERSION:  1.0.12                                                           #
+#     DATE:  November 13, 2025                                                 #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -115,9 +115,13 @@
 
 # Set xtrace option.
 
-if [[ $XTRACE ]]; then
+if [[ -n $XTRACE ]]; then
     set -x
 fi
+
+# Export variables that are optionally used by sourced scripts.
+
+export install_arg, option_arg, remove_arg, arg, args, bin
 
 # Define local variables and functions.
 
@@ -134,16 +138,16 @@ usage: p2pkg [-h] |
 
 function errmsg { echo "$r$t$script: $1$n" >&2; }
 function infomsg { echo "$g$t$script:$n $1"; }
-function echo_exit { echo; exit $1; }
+function echo_exit { echo; exit "$1"; }
 
-function chown_to_ref {                 # Change the owner:group of the target
-    declare -a lsd=("$(ls -ld "$1")")   # ($2) to that of the reference ($1)
-    chown -R "${lsd[2]}:${lsd[3]}" "$2"
+function chown_to_ref {                 # Change the owner:group of the targets
+    declare -a lsd=("$(ls -ld "$1")")   # ($2-$6) to that of the reference ($1)
+    chown -R "${lsd[2]}:${lsd[3]}" "$2 $3 $4 $5 $6"
 }
 
 function ok_to_continue {
     echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
-    read
+    read -r
     if [[ $REPLY != 'Y' ]]; then
         errmsg 'aborted'
         echo_exit 1
@@ -152,7 +156,7 @@ function ok_to_continue {
 
 function source_action_script {         # Conditionally source package-unique
     action=$1                           # action scripts.
-    if [[ $action ]]; then
+    if [[ -n $action ]]; then
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
             if [[ -f $action_script ]]; then
@@ -217,11 +221,11 @@ shift 1                                 # Reset argument numbering for the
 arg=$1
 args=$*
 
-if [[ ! $pkg_name ]]; then
+if [[ -z $pkg_name ]]; then
     errmsg 'no package specified'
     echo_exit 5
 fi
-if [[ ! $cpy$ftp$git$install$option$remove ]]; then
+if [[ -z $cpy$ftp$git$install$option$remove ]]; then
     errmsg 'no options specified'
     echo_exit 6
 fi
@@ -241,12 +245,12 @@ pkg=$src/$pkg_name_lower                # Package directory in the src
 
 # If remove was selected, do it first.
 
-source_action_script $remove
+source_action_script "$remove"
 
 # Optionally copy files from a local directory, download them from an ftp
 # server, or download them from github.
 
-if [[ $cpy ]]; then
+if [[ -n $cpy ]]; then
     cpy_lib=${cpy_lib:-/Volumes/mac-pro-share/krause/papamac}
     cpy_path=$cpy_lib/$pkg_name
     if [[ ! -d $cpy_path ]]; then
@@ -254,11 +258,11 @@ if [[ $cpy ]]; then
         echo_exit 7
     fi
     infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
-    mkdir -p $pkg
-    cp $cpy_path/* $pkg
-    chown_to_ref $PWD $src
+    mkdir -p "$pkg"
+    cp "$cpy_path"/* "$pkg"
+    chown_to_ref "$PWD" "$src"
 
-elif [[ $ftp ]]; then
+elif [[ -n $ftp ]]; then
     ftp_usr=${FTP_USR:-papamac}         # ftp account username.
     ftp_pwd=${FTP_PWD:-papa2352}        # ftp account password.
     ftp_url=${FTP_URL:-ftps://mac-pro.local:2121}  # ftp server URL.
@@ -268,34 +272,34 @@ elif [[ $ftp ]]; then
     wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
     exclude_list="$ftp_dir/$pkg_name/.*"
     infomsg "downloading $b$t$ftp_path$n to $b$t$pkg$n"
-    wget $wget_opts -X $exclude_list -P $pkg $ftp_path
+    wget "$wget_opts" -X "$exclude_list" -P "$pkg" "$ftp_path"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "wget: $pkg_name: download error ($exit_status)"
-        rm -fr $pkg
+        rm -fr "$pkg"
         echo_exit 8
     fi
-    chown_to_ref $PWD $src
+    chown_to_ref "$PWD" "$src"
 
-elif [[ $git ]]; then
-    rm -fr $pkg
+elif [[ -n $git ]]; then
+    rm -fr "$pkg"
     github_usr=${github_usr:-papamac}       # github account username.
     git_url=${GIT_URL:-https://github.com}  # github server URL.
     git_path=$git_url/$github_usr/$pkg_name
     infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone $branch $git_path $pkg
+    git clone "$branch" "$git_path" "$pkg"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
-        rm -fr $pkg
+        rm -fr "$pkg"
         echo_exit 9
     fi
-    rm -fr $pkg/.[!.]*
-    chown_to_ref $PWD $src
+    rm -fr "$pkg"/.[!.]*
+    chown_to_ref "$PWD" "$src"
 fi
 
 # Optionally execute install and option action bash-scripts in the correct order.
 
-source_action_script $install
-source_action_script $option
+source_action_script "$install"
+source_action_script "$option"
 echo_exit 0
