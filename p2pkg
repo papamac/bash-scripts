@@ -136,14 +136,6 @@ function errmsg { echo "$r$t$script: $1$n" >&2; }
 function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit "$1"; }
 
-function chown_to_ref {                 # Change the owner:group of the targets
-    lsld=$(ls -ld "$1")
-    echo "$lsld"
-    declare -a lslda=("$lsld")   # ($2-$6) to that of the reference ($1)
-    chown -R "${lslda[2]}:${lslda[3]}" $2 $3 $4 $5 $6
-    ls -ld $2 $3 $4 $5 $6
-}
-
 function ok_to_continue {
     echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
     read -r
@@ -151,6 +143,15 @@ function ok_to_continue {
         errmsg 'aborted'
         echo_exit 1
     fi
+}
+
+function chown_to_ref {                 # Change the owner:group of the targets
+    echo "y$t$1 $2 $3 $4 $5 $6$n"
+    lsld=$(ls -ld "$1")
+    echo "$y$t$lsld$n"
+    declare -a lslda=("$lsld")   # ($2-$6) to that of the reference ($1)
+    chown -R "${lslda[2]}:${lslda[3]}" $2 $3 $4 $5 $6
+    ls -ld $2 $3 $4 $5 $6
 }
 
 function source_action_script {         # Conditionally source package-unique
