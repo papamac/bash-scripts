@@ -148,6 +148,7 @@ function ok_to_continue {
 function chown_to_ref {                   # Change the owner:group of the target
     owner=$(ls -ld "$1" | cut -d' ' -f3)  # ($2) to that of the reference ($1)
     group=$(ls -ld "$1" | cut -d' ' -f4)
+    echo "$b$t$1 $2"
     chown -R "$owner:$group" $2
 }
 
