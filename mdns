@@ -70,13 +70,13 @@ function check {  # Check to see that the mDNS hostname is equal to
     host_address="$(hostname -I | cut -d' ' -f1)"
     mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
     if [[ -z $mdns_hostname ]]; then
-        echo "${p}Consider rebooting"
+        echo "${p}consider rebooting"
     else
         if [[ $mdns_hostname == $(hostname).local ]]; then
             echo "$host_address --> $b$t$mdns_hostname$n"
         else
-            echo "Hostname conflict $b$t$mdns_hostname$n"
-            echo "${p}Restarting avahi-daemon"
+            echo "hostname conflict $b$t$mdns_hostname$n"
+            echo "${p}restarting avahi-daemon"
             sudo systemctl restart avahi-daemon
             echo -n "$p"
             mdns_hostname="$(avahi-resolve -a "$host_address" | cut -f2)"
@@ -132,5 +132,5 @@ while getopts 'achi:lmn46?' opt; do
     esac
 done
 
-echo "${prefix}No action selected"
+echo "${prefix}no action selected"
 echo "$usage"
