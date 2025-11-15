@@ -145,19 +145,10 @@ function ok_to_continue {
     fi
 }
 
-function chown_to_ref {                 # Change the owner:group of the targets
-    echo "$g${t}chown_to_ref:$n $1 $2 $3"
-    # shellcheck disable=SC2012
-    owner=$(ls -ld "$1" | cut -d' ' -f3)
-    # shellcheck disable=SC2012
+function chown_to_ref {                   # Change the owner:group of the target
+    owner=$(ls -ld "$1" | cut -d' ' -f3)  # ($2) to that of the reference ($1)
     group=$(ls -ld "$1" | cut -d' ' -f4)
-    echo "$g${t}chown_to_ref:$n $owner $group"
-    lsld=$(ls -ld "$1")
-    declare -a lslda="($lsld)"         # ($2-$6) to that of the reference ($1)
-    owner_group=${lslda[2]}:${lslda[3]}
-    echo "$g${t}chown_to_ref:$n $owner_group"
-    chown -R "$owner_group" $2 $3
-    ls -ld "$2 $3 $4 $5 $6"
+    chown -R "$owner:$group" "$2"
 }
 
 function source_action_script {         # Conditionally source package-unique
