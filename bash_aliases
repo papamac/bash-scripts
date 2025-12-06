@@ -190,7 +190,7 @@ function rpi-install {
         if [[ $err != 0 ]]; then echo "$pfx $r${t} autoremove error$n"; errs='y'; fi
 
     else . # Install optional packages.
-
+        echo -e "\n$pfx installing/configuring optional packages\n"
     fi
 
     if [[ -z $errs ]]; then
