@@ -192,6 +192,7 @@ function rpi-install {
 
     fi
 
+    echo "err = $err"
     if [[ -z $err ]]; then
         echo -e "$pfx completed successfully\n"
     else
