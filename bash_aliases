@@ -157,7 +157,7 @@ function mv2bin {
 #                                                                             #
 ###############################################################################
 
-function rpi-install {
+function rpi_install {
     local opt=$1
     pfx="$g${t}rpi-install:$n"
     if [[ $opt != '-o' ]]; then . # Upgrade/install baseline packages.
@@ -207,4 +207,4 @@ function rpi-install {
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin rpi-install
+export -f c cp2bin mv2bin rpi_install
