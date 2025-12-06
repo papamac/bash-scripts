@@ -157,33 +157,38 @@ function mv2bin {
 #                                                                             #
 ###############################################################################
 
-function rpi-install1 {
-    script=${0##*/}
-    pfx=$g$t${script}:$n
-    echo -e "$pfx upgrading the rpiOS distribution\n"
-    sudo apt-get update
-    sudo apt-get -y dist-upgrade
-    err=$err$?
+function rpi-install {
+    pfx="\n$g${t}rpi-install:$n"
+    if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
 
-    echo -e "$pfx installing avahi-utils\n"
-    sudo apt-get -y avahi-utils
-    err=$err$?
+        echo -e "$pfx upgrading the rpiOS distribution\n"
+        sudo apt-get update
+        sudo apt-get -y dist-upgrade
+        err=$err$?
 
-    echo -e "$pfx installing/configuring the rgpio daemon\n"
-    sudo apt-get -y rgpiod
-    err=$err$?
-    sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
-    err=$err$?
-    sudo systemctl restart rgpiod
-    err=$err$?
+        echo -e "$pfx installing avahi-utils\n"
+        sudo apt-get -y install avahi-utils
+        err=$err$?
 
-    echo -e "$pfx removing unneeded packages\n"
-    sudo apt-get -y autoremove
-    err=$err$?
+        echo -e "$pfx installing/configuring the rgpio daemon\n"
+        sudo apt-get -y install rgpiod
+        err=$err$?
+        sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
+        err=$err$?
+        sudo systemctl restart rgpiod
+        err=$err$?
+
+        echo -e "$pfx removing unneeded packages\n"
+        sudo apt-get -y autoremove
+        err=$err$?
+
+    else . # Install optional packages.
+
+    fi
 
     if [[ -z $err ]]
-    then echo -e "\n$pfx completed successfully\n"
-    else echo -e "\n$pfx $r${t}failed with one or more errors$n\n"
+    then echo -e "$pfx completed successfully\n"
+    else echo -e "$pfx $r${t}failed with one or more errors$n\n"
     fi
 }
 
@@ -194,4 +199,4 @@ function rpi-install1 {
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin rpi-install1
+export -f c cp2bin mv2bin rpi-install
