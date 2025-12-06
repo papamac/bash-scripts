@@ -9,8 +9,8 @@
 #            See p2pkg -h for more precise usage.                             #
 #  OPTIONS:  See getopts comments in the script below.                        #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.12                                                           #
-#     DATE:  November 13, 2025                                                 #
+#  VERSION:  1.0.13                                                           #
+#     DATE:  December 3, 2025                                                 #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -137,11 +137,13 @@ function infomsg { echo "$g$t$script:$n $1"; }
 function echo_exit { echo; exit "$1"; }
 
 function ok_to_continue {
-    echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
-    read -r
-    if [[ $REPLY != 'Y' ]]; then
-        errmsg 'aborted'
-        echo_exit 1
+    if [[ -z $yes ]]; then
+        echo -n "$g$t$script:$n $1... ok to continue? [Y/n] "
+        read -r
+        if [[ $REPLY != 'Y' ]]; then
+            errmsg 'aborted'
+            echo_exit 1
+        fi
     fi
 }
 
@@ -171,7 +173,7 @@ function source_action_script {         # Conditionally source package-unique
 
 # Parse options and set action variables.
 
-while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
+while getopts 'b:cC:fF:gG:hiI:oO:rR:y' opt; do
     case $opt in
         b) branch="-b $OPTARG" ;;       # Define branch/tag option for the git
 #                                         clone in the github option.
@@ -205,6 +207,7 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:' opt; do
            remove_arg= ;;
         R) remove=remove                # Same as r, but include sn argument.
            remove_arg=$OPTARG ;;
+        y) yes=yes ;;
         ?) echo "$usage"
            exit 4 ;;
     esac

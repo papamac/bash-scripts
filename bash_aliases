@@ -99,6 +99,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
+alias stop='systemctl stop'
 
 ###############################################################################
 #                                                                             #
@@ -149,9 +150,48 @@ function mv2bin {
 
 ###############################################################################
 #                                                                             #
+#    FUNCTION:  rpi-install                                                   #
+#       TITLE:  Raspberry Pi upgrade and installation script                  #
+#    FUNCTION:  Move files to ~/bin and make them executable.                 #
+#       USAGE:  mv2bin [files]                                                #
+#                                                                             #
+###############################################################################
+
+function rpi-install1 {
+    script=${0##*/}
+    pfx=$g$t${script}:$n
+    echo -e "$pfx upgrading the rpiOS distribution\n"
+    sudo apt-get update
+    sudo apt-get -y dist-upgrade
+    err=$err$?
+
+    echo -e "$pfx installing avahi-utils\n"
+    sudo apt-get -y avahi-utils
+    err=$err$?
+
+    echo -e "$pfx installing/configuring the rgpio daemon\n"
+    sudo apt-get -y rgpiod
+    err=$err$?
+    sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
+    err=$err$?
+    sudo systemctl restart rgpiod
+    err=$err$?
+
+    echo -e "$pfx removing unneeded packages\n"
+    sudo apt-get -y autoremove
+    err=$err$?
+
+    if [[ -z $err ]]
+    then echo -e "\n$pfx completed successfully\n"
+    else echo -e "\n$pfx $r${t}failed with one or more errors$n\n"
+    fi
+}
+
+###############################################################################
+#                                                                             #
 #                            Startup Script for                               #
 #                               Raspberry Pi                                  #
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin
+export -f c cp2bin mv2bin rpi-install1
