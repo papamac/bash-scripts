@@ -159,28 +159,34 @@ function mv2bin {
 
 function rpi-install {
     pfx="\n$g${t}rpi-install:$n"
-    if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
+    if [[ -z $1 ]]; then . # Upgrade/install baseline packages.
 
         echo -e "$pfx upgrading the rpiOS distribution\n"
         sudo apt-get update
         sudo apt-get -y dist-upgrade
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
 
         echo -e "$pfx installing avahi-utils\n"
         sudo apt-get -y install avahi-utils
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
 
         echo -e "$pfx installing/configuring the rgpio daemon\n"
         sudo apt-get -y install rgpiod
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
         sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
         sudo systemctl restart rgpiod
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
 
         echo -e "$pfx removing unneeded packages\n"
         sudo apt-get -y autoremove
         err=$err$?
+        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
 
     else . # Install optional packages.
 
