@@ -158,45 +158,45 @@ function mv2bin {
 ###############################################################################
 
 function rpi-install {
-    pfx="\n$g${t}rpi-install:$n"
-    if [[ -z $1 ]]; then . # Upgrade/install baseline packages.
+    local opt=$1
+    pfx="$g${t}rpi-install:$n"
+    if [[ $opt != '-o' ]]; then . # Upgrade/install baseline packages.
 
-        echo -e "$pfx upgrading the rpiOS distribution\n"
+        echo -e "\n$pfx upgrading the rpiOS distribution\n"
         sudo apt-get update
         sudo apt-get -y dist-upgrade
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} dist-upgrade error$n"; errs='y'; fi
 
-        echo -e "$pfx installing avahi-utils\n"
+        echo -e "\n$pfx installing avahi-utils\n"
         sudo apt-get -y install avahi-utils
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} avahi-daemon install error$n"; errs='y'; fi
 
-        echo -e "$pfx installing/configuring the rgpio daemon\n"
+        echo -e "\n$pfx installing/configuring the rgpio daemon\n"
         sudo apt-get -y install rgpiod
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod install error$n"; errs='y'; fi
         sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod editing error$n"; errs='y'; fi
         sudo systemctl restart rgpiod
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod restart error$n"; errs='y'; fi
 
-        echo -e "$pfx removing unneeded packages\n"
+        echo -e "\n$pfx removing unneeded packages\n"
         sudo apt-get -y autoremove
-        err=$err$?
-        if [[ -n $err ]]; then echo -e "$pfx error $err\n"; fi
+        err=$?
+        if [[ $err != 0 ]]; then echo "$pfx $r${t} autoremove error$n"; errs='y'; fi
 
     else . # Install optional packages.
 
     fi
 
-    echo "err = $err"
-    if [[ -z $err ]]; then
-        echo -e "$pfx completed successfully\n"
+    if [[ -z $errs ]]; then
+        echo -e "\n$pfx completed successfully\n"
     else
-        echo -e "$pfx $r${t}failed with one or more errors$n\n"
+        echo -e "\n$pfx $r${t}failed with one or more errors$n\n"
     fi
 }
 
