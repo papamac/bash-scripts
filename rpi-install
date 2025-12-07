@@ -81,16 +81,13 @@ if [[ $1 != '-o' ]]; then  # Upgrade/install baseline packages.
     check 'rgpiod options editing error'
     sudo systemctl restart rgpiod
     err=$?
-    systemctl status rgpiod
+    systemctl -n0 status rgpiod
     check 'rgpio daemon restart error'
 
     title 'removing unneeded packages'
     sudo apt-get -y autoremove
     err=$?
     check 'autoremove error'
-
-    err='y'
-    check 'foobar error'
 
 else . # Install optional packages.
     title 'installing/configuring optional packages'
