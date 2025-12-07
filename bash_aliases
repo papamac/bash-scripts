@@ -114,8 +114,8 @@ alias stop='systemctl stop'
 
 function c {
     cd "$1"
-    pwd
     err=$?
+    pwd
     if [[ $err == '0' ]]; then
         ls -lah
     fi
