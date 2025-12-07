@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ###############################################################################
 #                                                                             #
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
@@ -157,10 +158,9 @@ function mv2bin {
 #                                                                             #
 ###############################################################################
 
-function foo {
-    local opt=$1
+function rpi-install {
     pfx="$g${t}rpi-install:$n"
-    if [[ $opt != '-o' ]]; then . # Upgrade/install baseline packages.
+    if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
 
         echo -e "\n$pfx upgrading the rpiOS distribution\n"
         sudo apt-get update
@@ -207,4 +207,4 @@ function foo {
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin foo
+export -f c cp2bin mv2bin rpi-install
