@@ -1,15 +1,15 @@
+#!/usr/bin/env bash
 ###############################################################################
 #                                                                             #
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
-#     FILE:  remove                                                           #
-#    TITLE:  Remove the bash-scripts package (remove)                         #
-# FUNCTION:  Restore system files to their state before any installations by  #
-#            the install or option bash-scripts.                              #
-#    USAGE:  source src/bash-scripts/remove or p2pkg -r bash-scripts (see     #
-#            examples below).                                                 #
+#     FILE:  rpi-install                                                      #
+#    TITLE:  papamac's Raspberry Pi Installation/Configuration Script         #
+# FUNCTION:  Install and configure rpiOs packages to support the Pi GPIO and  #
+             other Indigo plugins                                             #
+#    USAGE:  rpi-install [-o]                                                 #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.10                                                           #
-#     DATE:  November 14, 2025                                                #
+#  VERSION:  1.0.0                                                            #
+#     DATE:  December 7, 2025                                                 #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -39,44 +39,63 @@
 #                                                                             #
 # DESCRIPTION:                                                                #
 #                                                                             #
-# The remove script removes all bash-scripts files from the HOME and current  #
-# working directories.                                                        #
-#                                                                             #
-# remove is designed to be used with p2pkg.  Usage examples are as follows:   #
-#                                                                             #
-# sudo p2pkg -r bash-scripts            # Remove the bash-scripts package     #
-#                                         from the HOME and current working   #
-#                                         directories.                        #
-#                                                                             #
-# cd /usr/local                         # Remove the bash-scripts package     #
-# sudo p2pkg -r bash-scripts              from the HOME and /usr/local        #
-#                                         directories.                        #
-#                                                                             #
-#                                                                             #
-# DEPENDENCIES/LIMITATIONS:                                                   #
-#                                                                             #
-# When running remove via p2pkg in a sudo environment, sudo -E must be used   #
-# to preserve the user's HOME directory.  remove checks for this and exits if #
-# $HOME is /root.  papamac's runtime environment (see bash_aliases) prevents  #
-# this from happening by aliasing sudo to sudo -E.                            #
+# Needs work.                                                                 #
 #                                                                             #
 ###############################################################################
 
-# Check for valid HOME directory.
+# Define local variables and functions.
 
-if [[ $HOME == "/root" ]]; then
-    errmsg "remove: HOME directory is /root; use sudo -E"
-    echo_exit 10
+script=${0##*/}                       # Script name.
+prefix="$g$t$script:$n "              # Message prefix.
+
+function title {
+    echo -e "\n$prefix$1\n"
+}
+
+function check {
+    if [[ $err != 0 ]]; then
+        echo "$prefix$r$t$1$n"
+        errs='y'
+    fi
+}
+
+if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
+
+    title 'upgrading the rpiOS distribution'
+    sudo apt-get update
+    sudo apt-get -y dist-upgrade
+    err=$?
+    check 'dist-upgrade error'
+
+    title 'installing avahi-utils'
+    sudo apt-get -y install avahi-utils
+    err=$?
+    check 'avahi-utils install error'
+
+    title 'installing/configuring the rgpio daemon'
+    sudo apt-get -y install rgpiod
+    err=$?
+    check 'rgpio daemon install error'
+    systemctl status rgpiod
+    sudo sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
+    err=$?
+    check 'rgpiod options editing error'
+    sudo systemctl restart rgpiod
+    err=$?
+    check 'rgpio daemon restart error'
+    systemctl status rgpiod
+
+    title 'removing unneeded packages'
+    sudo apt-get -y autoremove
+    err=$?
+    check 'autoremove error'
+
+else . # Install optional packages.
+    title 'installing/configuring optional packages'
 fi
 
-# Remove bash-scripts files and directories from the current working directory.
-
-infomsg "$g${t}remove:$n removing bash-scripts files and directories from $b$t$PWD$n"
-rm -f "$bin"/mdns "$bin"/p2pkg "$bin"/rpi-install
-rmdir --ignore-fail-on-non-empty "$bin"
-rm -rf "$pkg" "$src"
-
-# Remove home file and directories.
-
-infomsg "$g${t}remove:$n removing home files and directories from $b$t$HOME$n"
-rm -rf ~/.bash_aliases ~/bin
+if [[ -z $errs ]]; then
+    title 'completed successfully'
+else
+    title 'failed with one or more errors'
+fi

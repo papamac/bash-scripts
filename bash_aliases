@@ -105,18 +105,15 @@ alias stop='systemctl stop'
 ###############################################################################
 #                                                                             #
 #    FUNCTION:  c                                                             #
-#       TITLE:  change directory                                              #
+#       TITLE:  change directory and list                                     #
 #    FUNCTION:  Change the working directory and list the contents of the new #
 #               directory.                                                    #
-#       USAGE:  c [dir]                                                       #
+#       USAGE:  c dir                                                         #
 #                                                                             #
 ###############################################################################
 
 function c {
-    cd "$1"
-    err=$?
-    pwd
-    if [[ $err == '0' ]]; then
+    if cd "$1"; then
         ls -lah
     fi
 }
@@ -153,60 +150,9 @@ function mv2bin {
 
 ###############################################################################
 #                                                                             #
-#    FUNCTION:  rpi-install                                                   #
-#       TITLE:  Raspberry Pi upgrade and installation script                  #
-#    FUNCTION:  Move files to ~/bin and make them executable.                 #
-#       USAGE:  mv2bin [files]                                                #
-#                                                                             #
-###############################################################################
-
-function rpi-install {
-    pfx="$g${t}rpi-install:$n"
-    if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
-
-        echo -e "\n$pfx upgrading the rpiOS distribution\n"
-        sudo apt-get update
-        sudo apt-get -y dist-upgrade
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} dist-upgrade error$n"; errs='y'; fi
-
-        echo -e "\n$pfx installing avahi-utils\n"
-        sudo apt-get -y install avahi-utils
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} avahi-daemon install error$n"; errs='y'; fi
-
-        echo -e "\n$pfx installing/configuring the rgpio daemon\n"
-        sudo apt-get -y install rgpiod
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod install error$n"; errs='y'; fi
-        sudo sed -i.save "/-l/s/DAEMON/#DAEMON/" /etc/default/rgpiod
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod editing error$n"; errs='y'; fi
-        sudo systemctl restart rgpiod
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} rgpiod restart error$n"; errs='y'; fi
-
-        echo -e "\n$pfx removing unneeded packages\n"
-        sudo apt-get -y autoremove
-        err=$?
-        if [[ $err != 0 ]]; then echo "$pfx $r${t} autoremove error$n"; errs='y'; fi
-
-    else . # Install optional packages.
-        echo -e "\n$pfx installing/configuring optional packages\n"
-    fi
-
-    if [[ -z $errs ]]; then
-        echo -e "\n$pfx completed successfully\n"
-    else
-        echo -e "\n$pfx $r${t}failed with one or more errors$n\n"
-    fi
-}
-
-###############################################################################
-#                                                                             #
 #                            Startup Script for                               #
 #                               Raspberry Pi                                  #
 #                                                                             #
 ###############################################################################
 
-export -f c cp2bin mv2bin rpi-install
+export -f c cp2bin mv2bin

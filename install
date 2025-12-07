@@ -101,3 +101,4 @@ chown_to_ref "$HOME" ~/bin
 
 install mdns
 install p2pkg
+install rpi-install
