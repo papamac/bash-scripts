@@ -5,7 +5,7 @@
 #     FILE:  rpi-install                                                      #
 #    TITLE:  papamac's Raspberry Pi Installation/Configuration Script         #
 # FUNCTION:  Install and configure rpiOs packages to support the Pi GPIO and  #
-             other Indigo plugins                                             #
+#            other Indigo plugins                                             #
 #    USAGE:  rpi-install [-o]                                                 #
 #   AUTHOR:  papamac                                                          #
 #  VERSION:  1.0.0                                                            #
@@ -59,7 +59,7 @@ function check {
     fi
 }
 
-if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
+if [[ $1 != '-o' ]]; then  # Upgrade/install baseline packages.
 
     title 'upgrading the rpiOS distribution'
     sudo apt-get update
@@ -76,19 +76,21 @@ if [[ $1 != '-o' ]]; then . # Upgrade/install baseline packages.
     sudo apt-get -y install rgpiod
     err=$?
     check 'rgpio daemon install error'
-    systemctl status rgpiod
     sudo sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
     err=$?
     check 'rgpiod options editing error'
     sudo systemctl restart rgpiod
     err=$?
-    check 'rgpio daemon restart error'
     systemctl status rgpiod
+    check 'rgpio daemon restart error'
 
     title 'removing unneeded packages'
     sudo apt-get -y autoremove
     err=$?
     check 'autoremove error'
+
+    err='y'
+    check 'foobar error'
 
 else . # Install optional packages.
     title 'installing/configuring optional packages'
