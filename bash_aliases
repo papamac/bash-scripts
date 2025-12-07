@@ -113,8 +113,8 @@ alias stop='systemctl stop'
 ###############################################################################
 
 function c {
-    local dir=$1
-    if cd "$dir"; then
+    if cd "$1"; then
+        pwd
         ls -lah
     fi
 }
