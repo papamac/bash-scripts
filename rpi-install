@@ -59,7 +59,7 @@ function check {
     fi
 }
 
-if [[ $1 != '-o' ]]; then  # Upgrade/install baseline packages.
+if [[ -z $1 || $1 == '--base' ]]; then  # Upgrade/install baseline packages.
 
     title 'upgrading the rpiOS distribution'
     sudo apt-get update
@@ -67,31 +67,61 @@ if [[ $1 != '-o' ]]; then  # Upgrade/install baseline packages.
     err=$?
     check 'dist-upgrade error'
 
-    title 'installing avahi-utils'
-    sudo apt-get -y install avahi-utils
+    title 'installing avahi-utils and rgpiod'
+    sudo apt-get -y install avahi-utils rgpiod
     err=$?
-    check 'avahi-utils install error'
+    check 'installation error'
 
-    title 'installing/configuring the rgpio daemon'
-    sudo apt-get -y install rgpiod
-    err=$?
-    check 'rgpio daemon install error'
+    title 'configuring and restarting rgpiod'
     sudo sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
     err=$?
     check 'rgpiod options editing error'
     sudo systemctl restart rgpiod
     err=$?
     systemctl -n0 status rgpiod
-    check 'rgpio daemon restart error'
-
-    title 'removing unneeded packages'
-    sudo apt-get -y autoremove
-    err=$?
-    check 'autoremove error'
-
-else . # Install optional packages.
-    title 'installing/configuring optional packages'
+    check 'rgpiod restart error'
 fi
+
+if [[ -z $1 || $1 == '--samba' ]]; then  # Install samba for file sharing.
+
+    title 'installing samba'
+    sudo apt-get update
+    sudo apt-get -y install samba samba-common-bin
+    err=$?
+    check 'samba installation error'
+
+    title 'configuring and restarting samba'
+    sudo sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
+    err=$?
+    check 'samba config editing error'
+    sudo systemctl restart smbd
+    err=$?
+    systemctl -n0 status smbd
+    check 'smbd restart error'
+fi
+
+if [[ -z $1 || $1 == '--ser2sock' ]]; then  # Install ser2sock and telnet.
+
+    title 'installing ser2sock'
+    cd /usr/local && sudo p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
+    err=$?
+    if [[ $err == 0 ]]; then
+        sudo p2pkg -y -gio ser2sock-scripts
+        err=$?
+    fi
+    check 'ser2sock installation error'
+
+    title 'installing telnet'
+    sudo apt-get update
+    sudo apt-get -y install telnet
+    err=$?
+    check 'telnet installation error'
+fi
+
+title 'removing unneeded packages'
+sudo apt-get -y autoremove
+err=$?
+check 'autoremove error'
 
 if [[ -z $errs ]]; then
     title 'completed successfully'
