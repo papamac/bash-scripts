@@ -105,10 +105,10 @@ for pkg in "$@"; do
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
     
         title 'installing ser2sock'
-        cd /usr/local && source p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
+        cd /usr/local && p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
-            source p2pkg -y -gio ser2sock-scripts
+            p2pkg -y -gio ser2sock-scripts
             exit_code=$?
             systemctl -n0 status ser2sockd
         fi
@@ -132,3 +132,4 @@ if [[ -z $error ]]; then
 else
     title "$r${t}failed with one or more errors$n"
 fi
+echo
