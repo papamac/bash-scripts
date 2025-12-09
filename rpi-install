@@ -8,8 +8,8 @@
 #            other Indigo plugins                                             #
 #    USAGE:  rpi-install [-o]                                                 #
 #   AUTHOR:  papamac                                                          #
-#  VERSION:  1.0.0                                                            #
-#     DATE:  December 7, 2025                                                 #
+#  VERSION:  1.0.1                                                            #
+#     DATE:  December 9, 2025                                                 #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -49,7 +49,7 @@ script=${0##*/}                       # Script name.
 prefix="$g$t$script:$n "              # Message prefix.
 
 function title {
-    echo -e "\n$prefix$1\n"
+    echo -e "\n$prefix$1"
 }
 
 function check {
@@ -59,73 +59,76 @@ function check {
     fi
 }
 
-if [[ -z $1 || $1 == '--base' ]]; then  # Upgrade/install baseline packages.
-
-    title 'upgrading the rpiOS distribution'
-    sudo apt-get update
-    sudo apt-get -y dist-upgrade
-    exit_code=$?
-    check 'dist-upgrade error'
-
-    title 'installing avahi-utils and rgpiod'
-    sudo apt-get -y install avahi-utils rgpiod
-    exit_code=$?
-    check 'installation error'
-
-    title 'configuring and restarting rgpiod'
-    sudo sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
-    exit_code=$?
-    check 'rgpiod options editing error'
-    sudo systemctl restart rgpiod
-    exit_code=$?
-    systemctl -n0 status rgpiod
-    check 'rgpiod restart error'
-fi
-
-if [[ -z $1 || $1 == '--samba' ]]; then  # Install samba for file sharing.
-
-    title 'installing samba'
-    sudo apt-get update
-    sudo apt-get -y install samba samba-common-bin
-    exit_code=$?
-    check 'samba installation error'
-
-    title 'configuring and restarting samba'
-    sudo sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
-    exit_code=$?
-    check 'samba config editing error'
-    sudo systemctl restart smbd
-    exit_code=$?
-    systemctl -n0 status smbd
-    check 'smbd restart error'
-fi
-
-if [[ -z $1 || $1 == '--ser2sock' ]]; then  # Install ser2sock and telnet.
-
-    title 'installing ser2sock'
-    cd /usr/local && source sudo p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
-    exit_code=$?
-    if [[ $exit_code == 0 ]]; then
-        source sudo p2pkg -y -gio ser2sock-scripts
+for pkg in "$@"; do
+    
+    if [[ $pkg == 'all' || $pkg == 'base' ]]; then  # Upgrade/install baseline packages.
+    
+        title 'upgrading the rpiOS distribution'
+        apt-get update
+        apt-get -y dist-upgrade
         exit_code=$?
-        systemctl -n0 status ser2sockd
+        check 'dist-upgrade error'
+    
+        title 'installing avahi-utils and rgpiod'
+        apt-get -y install avahi-utils rgpiod
+        exit_code=$?
+        check 'installation error'
+    
+        title 'configuring and restarting rgpiod'
+        sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
+        exit_code=$?
+        check 'rgpiod options editing error'
+        systemctl restart rgpiod
+        exit_code=$?
+        systemctl -n0 status rgpiod
+        check 'rgpiod restart error'
     fi
-    check 'ser2sock installation error'
-
-    title 'installing telnet'
-    sudo apt-get update
-    sudo apt-get -y install telnet
-    exit_code=$?
-    check 'telnet installation error'
-fi
+    
+    if [[ $pkg == 'all' || $pkg == 'samba' ]]; then  # Install samba for file sharing.
+    
+        title 'installing samba'
+        apt-get update
+        apt-get -y install samba samba-common-bin
+        exit_code=$?
+        check 'samba installation error'
+    
+        title 'configuring and restarting samba'
+        sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
+        exit_code=$?
+        check 'samba config editing error'
+        systemctl restart smbd
+        exit_code=$?
+        systemctl -n0 status smbd
+        check 'smbd restart error'
+    fi
+    
+    if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
+    
+        title 'installing ser2sock'
+        cd /usr/local && source p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
+        exit_code=$?
+        if [[ $exit_code == 0 ]]; then
+            source p2pkg -y -gio ser2sock-scripts
+            exit_code=$?
+            systemctl -n0 status ser2sockd
+        fi
+        check 'ser2sock installation error'
+    
+        title 'installing telnet'
+        apt-get update
+        apt-get -y install telnet
+        exit_code=$?
+        check 'telnet installation error'
+    fi
+done
 
 title 'removing unneeded packages'
-sudo apt-get -y autoremove
+apt-get -y autoremove
 exit_code=$?
 check 'autoremove error'
 
 if [[ -z $error ]]; then
     title 'completed successfully'
 else
-    title 'failed with one or more errors'
+    title "$r${t}failed with one or more errors$n"
 fi
