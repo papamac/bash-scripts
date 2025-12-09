@@ -103,10 +103,10 @@ fi
 if [[ -z $1 || $1 == '--ser2sock' ]]; then  # Install ser2sock and telnet.
 
     title 'installing ser2sock'
-    cd /usr/local && sudo p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
+    cd /usr/local && source sudo p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
     exit_code=$?
     if [[ $exit_code == 0 ]]; then
-        sudo p2pkg -y -gio ser2sock-scripts
+        source sudo p2pkg -y -gio ser2sock-scripts
         exit_code=$?
         systemctl -n0 status ser2sockd
     fi
