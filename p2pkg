@@ -123,7 +123,7 @@ fi
 
 script=${0##*/}                         # Script name.
 usage="\
-usage: p2pkg [-h] |
+usage: p2pkg [-h] | [-y] |
              [[[-c | -C cpy_lib] |
              [-f | -F ftp_dir] |
              [[-b branch][-g | -G github_usr]]
@@ -160,20 +160,24 @@ function source_action_script {         # Conditionally source package-unique
             action_script=$pkg/$action
             if [[ -f $action_script ]]; then
                 source "$action_script"
+                exit_code=$?
+                if [[ $exit_code != 0 ]]; then
+                    echo_exit 2
+                fi
             else
                 errmsg "$action_script: file not found"
-                echo_exit 2
+                echo_exit 3
             fi
         else
             errmsg "$pkg: directory not found"
-            echo_exit 3
+            echo_exit 4
         fi
     fi
 }
 
 # Parse options and set action variables.
 
-while getopts 'b:cC:fF:gG:hiI:oO:rR:y' opt; do
+while getopts 'b:cC:fF:gG:hiI:oO:rR:y?' opt; do
     case $opt in
         b) branch="-b $OPTARG" ;;       # Define branch/tag option for the git
 #                                         clone in the github option.
@@ -209,7 +213,7 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:y' opt; do
            remove_arg=$OPTARG ;;
         y) yes=yes ;;
         ?) echo "$usage"
-           exit 4 ;;
+           exit 5 ;;
     esac
 done
 shift $((OPTIND - 1))
@@ -223,11 +227,11 @@ args=$*
 
 if [[ -z $pkg_name ]]; then
     errmsg 'no package specified'
-    echo_exit 5
+    echo_exit 6
 fi
 if [[ -z $cpy$ftp$git$install$option$remove ]]; then
     errmsg 'no options specified'
-    echo_exit 6
+    echo_exit 7
 fi
 
 # Verify operation in the current working directory.
@@ -255,7 +259,7 @@ if [[ -n $cpy ]]; then
     cpy_path=$cpy_lib/$pkg_name
     if [[ ! -d $cpy_path ]]; then
         errmsg "cpy: $cpy_path: library not found"
-        echo_exit 7
+        echo_exit 8
     fi
     infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
     mkdir -p "$pkg"
@@ -277,7 +281,7 @@ elif [[ -n $ftp ]]; then
     if [[ $exit_status != 0 ]]; then
         errmsg "wget: $pkg_name: download error ($exit_status)"
         rm -rf "$pkg"
-        echo_exit 8
+        echo_exit 9
     fi
     chown_to_ref "$PWD" "$src"
 
@@ -292,7 +296,7 @@ elif [[ -n $git ]]; then
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
         rm -rf "$pkg"
-        echo_exit 9
+        echo_exit 10
     fi
     rm -rf "$pkg"/.[!.]*
     chown_to_ref "$PWD" "$src"

@@ -53,9 +53,9 @@ function title {
 }
 
 function check {
-    if [[ $err != 0 ]]; then
+    if [[ $exit_code != 0 ]]; then
         echo "$prefix$r$t$1$n"
-        errs='y'
+        error='yes'
     fi
 }
 
@@ -64,20 +64,20 @@ if [[ -z $1 || $1 == '--base' ]]; then  # Upgrade/install baseline packages.
     title 'upgrading the rpiOS distribution'
     sudo apt-get update
     sudo apt-get -y dist-upgrade
-    err=$?
+    exit_code=$?
     check 'dist-upgrade error'
 
     title 'installing avahi-utils and rgpiod'
     sudo apt-get -y install avahi-utils rgpiod
-    err=$?
+    exit_code=$?
     check 'installation error'
 
     title 'configuring and restarting rgpiod'
     sudo sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
-    err=$?
+    exit_code=$?
     check 'rgpiod options editing error'
     sudo systemctl restart rgpiod
-    err=$?
+    exit_code=$?
     systemctl -n0 status rgpiod
     check 'rgpiod restart error'
 fi
@@ -87,15 +87,15 @@ if [[ -z $1 || $1 == '--samba' ]]; then  # Install samba for file sharing.
     title 'installing samba'
     sudo apt-get update
     sudo apt-get -y install samba samba-common-bin
-    err=$?
+    exit_code=$?
     check 'samba installation error'
 
     title 'configuring and restarting samba'
     sudo sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
-    err=$?
+    exit_code=$?
     check 'samba config editing error'
     sudo systemctl restart smbd
-    err=$?
+    exit_code=$?
     systemctl -n0 status smbd
     check 'smbd restart error'
 fi
@@ -104,26 +104,27 @@ if [[ -z $1 || $1 == '--ser2sock' ]]; then  # Install ser2sock and telnet.
 
     title 'installing ser2sock'
     cd /usr/local && sudo p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
-    err=$?
-    if [[ $err == 0 ]]; then
+    exit_code=$?
+    if [[ $exit_code == 0 ]]; then
         sudo p2pkg -y -gio ser2sock-scripts
-        err=$?
+        exit_code=$?
+        systemctl -n0 status ser2sockd
     fi
     check 'ser2sock installation error'
 
     title 'installing telnet'
     sudo apt-get update
     sudo apt-get -y install telnet
-    err=$?
+    exit_code=$?
     check 'telnet installation error'
 fi
 
 title 'removing unneeded packages'
 sudo apt-get -y autoremove
-err=$?
+exit_code=$?
 check 'autoremove error'
 
-if [[ -z $errs ]]; then
+if [[ -z $error ]]; then
     title 'completed successfully'
 else
     title 'failed with one or more errors'
