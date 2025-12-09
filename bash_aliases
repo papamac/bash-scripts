@@ -100,7 +100,7 @@ alias reboot='sudo reboot'
 alias shutdown='sudo shutdown -h now'
 alias restart='sudo systemctl restart'
 alias status='systemctl status'
-alias stop='systemctl stop'
+alias stop='sudo systemctl stop'
 
 ###############################################################################
 #                                                                             #

@@ -84,7 +84,7 @@ function install {
 
 # Check for valid HOME directory.
 
-if [[ $HOME == "/root" ]]; then
+if [[ $HOME == '/root' ]]; then
     errmsg "install: HOME directory is /root; use sudo -E"
     echo_exit 11
 fi

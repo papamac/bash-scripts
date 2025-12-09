@@ -64,7 +64,7 @@
 
 # Check for valid HOME directory.
 
-if [[ $HOME == "/root" ]]; then
+if [[ $HOME == '/root' ]]; then
     errmsg "remove: HOME directory is /root; use sudo -E"
     echo_exit 11
 fi

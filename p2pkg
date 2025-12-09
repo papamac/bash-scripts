@@ -162,6 +162,7 @@ function source_action_script {         # Conditionally source package-unique
                 source "$action_script"
                 exit_code=$?
                 if [[ $exit_code != 0 ]]; then
+                    errmsg "$action_script: exit code $exit_code"
                     echo_exit 2
                 fi
             else
