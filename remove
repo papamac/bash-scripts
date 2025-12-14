@@ -75,7 +75,7 @@ fi
 
 # Remove bash-scripts files and directories from the current working directory.
 
-infomsg "removing bash-scripts files and directories from $b$t$PWD$n"
+infomsg "removing $m$t$pkg$n files and directories from $b$t$PWD$n"
 rm -f "$bin"/mdns "$bin"/p2pkg "$bin"/rpi-install
 rmdir --ignore-fail-on-non-empty "$bin"
 rm -rf "$pkg" "$src"
