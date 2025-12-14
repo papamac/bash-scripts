@@ -260,7 +260,7 @@ if [[ -n $cpy ]]; then
     cpy_lib=${cpy_lib:-/Volumes/mac-pro-share/krause/papamac}
     cpy_path=$cpy_lib/$pkg_name
     if [[ ! -d $cpy_path ]]; then
-        errmsg "$cpy_path: library not found" 'cpy: '
+        errmsg "$cpy_path library not found" 'cpy: '
         exit 8
     fi
     infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
@@ -281,7 +281,7 @@ elif [[ -n $ftp ]]; then
     wget "$wget_opts" -X "$exclude_list" -P "$pkg" "$ftp_path"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
-        errmsg "$pkg_name: download error ($exit_status)" 'wget: '
+        errmsg "$pkg_name download error ($exit_status)" 'wget: '
         rm -rf "$pkg"
         exit 9
     fi
@@ -296,7 +296,7 @@ elif [[ -n $git ]]; then
     git clone $branch "$git_path" "$pkg"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
-        errmsg "$pkg_name: download error ($exit_status)" 'git: '
+        errmsg "$pkg_name download error ($exit_status)" 'git: '
         rm -rf "$pkg"
         exit 10
     fi
