@@ -105,16 +105,17 @@ for pkg in "$@"; do
     
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
     
-        title "installing $m${t}ser2sock$n and $m${t}telnet$n"
+        title "installing $m${t}ser2sock$n"
         cd /usr/local
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
             p2pkg -y -gio ser2sock-scripts
             exit_code=$?
         fi
+        systemctl -n0 status ser2sockd
         check "$m${t}ser2sock$n $r${t}installation error"
     
-        title 'installing telnet'
+        title "installing $m${t}telnet$n"
         apt-get update
         apt-get -y install telnet
         exit_code=$?
