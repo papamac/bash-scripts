@@ -47,6 +47,7 @@
 
 script=${0##*/}                       # Script name.
 prefix="$g$t$script:$n "              # Message prefix.
+export prefix
 
 function title {
     echo -e "\n$prefix$1"

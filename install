@@ -97,7 +97,7 @@ chown_to_ref "$HOME" ~/.bash_aliases
 mkdir -p ~/bin
 chown_to_ref "$HOME" ~/bin
 
-# Install the mdns and p2pkg scripts.
+# Install the mdns, p2pkg, and rpi-install scripts.
 
 install mdns
 install p2pkg
