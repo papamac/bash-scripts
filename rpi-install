@@ -55,7 +55,7 @@ function title {
 
 function check {
     if [[ $exit_code != 0 ]]; then
-        echo "$prefix$r$t$1$n"
+        echo "$prefix$n$2$r$t$1$n"
         error='yes'
     fi
 }
@@ -78,11 +78,11 @@ for pkg in "$@"; do
         title "configuring and restarting $m${t}rgpiod$n"
         sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
         exit_code=$?
-        check "$m${t}rgpiod$n $r${t}options editing error"
+        check 'options editing error' "$m${t}rgpiod$n "
         systemctl restart rgpiod
         exit_code=$?
         systemctl -n0 status rgpiod
-        check "$m${t}rgpiod$n $r${t}restart error"
+        check 'restart error' "$m${t}rgpiod$n "
     fi
     
     if [[ $pkg == 'all' || $pkg == 'samba' ]]; then  # Install samba for file sharing.
@@ -91,16 +91,16 @@ for pkg in "$@"; do
         apt-get update
         apt-get -y install samba samba-common-bin
         exit_code=$?
-        check "$m${t}samba$n $r${t}installation error"
+        check 'installation error' "$m${t}samba$n"
     
         title "configuring and restarting $m${t}samba$n"
         sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
         exit_code=$?
-        check "$m${t}samba$n $r${t}config editing error"
+        check 'config editing error' "$m${t}samba$n"
         systemctl restart smbd
         exit_code=$?
         systemctl -n0 status smbd
-        check "$c${t}smbd$n $r${t}restart error"
+        check 'restart error' "$c${t}smbd$n"
     fi
     
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
@@ -113,13 +113,13 @@ for pkg in "$@"; do
             exit_code=$?
         fi
         systemctl -n0 status ser2sockd
-        check "$m${t}ser2sock$n $r${t}installation error"
+        check 'installation error' "$m${t}ser2sock$n"
     
         title "installing $m${t}telnet$n"
         apt-get update
-        apt-get -y install telnet
+        apt-get -y install telnetx
         exit_code=$?
-        check "$m%{t}telnet$n $r${t}installation error"
+        check 'installation error' "$m${t}telnet$n"
     fi
 done
 
