@@ -184,20 +184,19 @@ while getopts 'b:cC:fF:gG:hiI:oO:rR:y?' opt; do
     case $opt in
         b) branch="-b $OPTARG" ;;       # Define branch/tag option for the git
 #                                         clone in the github option.
-        c) cpy=cpy ;;                   # Copy the package directory from a
-#                                         local library to the src directory
-#                                         of the current working directory.
+        c) cpy=cpy ;;                   # Copy the package from a local library
+#                                         to the src directory of the current
+#                                         working directory.
         C) cpy=cpy                      # Same as c, but set cpy_lib.
            cpy_lib=$OPTARG ;;
-        f) ftp=ftp ;;                   # Download the package directory from
-#                                         the ftp server to the src directory
-#                                         of the current working directory.
+        f) ftp=ftp ;;                   # Download the package from the ftp
+#                                         server to the src directory of the
+#                                         current working directory.
         F) ftp=ftp                      # Same as f, but set the ftp_dir.
            ftp_dir=$OPTARG ;;
-        g) git=git ;;                   # Download the package directory from
-#                                         the github server to the src
-#                                         directory of the current working
-#                                         directory.
+        g) git=git ;;                   # Clone the package from the github
+#                                         server into the src directory of the
+#                                         current working directory.
         G) git=git                      # Same as g, but set the github_usr.
            github_usr=$OPTARG ;;
         h) echo "$usage"                # Help.
@@ -257,13 +256,13 @@ source_action_script "$remove"
 # server, or download them from github.
 
 if [[ -n $cpy ]]; then
-    cpy_lib=${cpy_lib:-/Volumes/mac-pro-share/krause/papamac}
+    cpy_lib=${cpy_lib:-/Users/Share/Software}
     cpy_path=$cpy_lib/$pkg_name
     if [[ ! -d $cpy_path ]]; then
         errmsg "$cpy_path library not found" 'cpy: '
         exit 8
     fi
-    infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
+    infomsg "copying $m$t$pkg_name$n from $b$t$cpy_lib$n to $b$t$pkg$n"
     mkdir -p "$pkg"
     cp "$cpy_path"/* "$pkg"
     chown_to_ref "$PWD" "$src"
@@ -271,13 +270,13 @@ if [[ -n $cpy ]]; then
 elif [[ -n $ftp ]]; then
     ftp_usr=${FTP_USR:-papamac}         # ftp account username.
     ftp_pwd=${FTP_PWD:-papa2352}        # ftp account password.
-    ftp_url=${FTP_URL:-ftps://mac-pro.local:2121}  # ftp server URL.
+    ftp_url=${FTP_URL:-ftps://mbp24.local:2121}  # ftp server URL.
     ftp_dir=${ftp_dir:-papamac}         # ftp package directory.
     ftp_path=$ftp_url/$ftp_dir/$pkg_name
     wget_opts='-qrR .DS_Store -nH --cut-dirs=2 --check-certificate=quiet'
     wget_opts="$wget_opts --user=$ftp_usr --password=$ftp_pwd"
     exclude_list="$ftp_dir/$pkg_name/.*"
-    infomsg "downloading $b$t$ftp_path$n to $b$t$pkg$n"
+    infomsg "downloading $m$t$pkg_name$n from $b$t$ftp_dir$n to $b$t$pkg$n"
     wget "$wget_opts" -X "$exclude_list" -P "$pkg" "$ftp_path"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
@@ -289,11 +288,12 @@ elif [[ -n $ftp ]]; then
 
 elif [[ -n $git ]]; then
     rm -rf "$pkg"
-    github_usr=${github_usr:-papamac}       # github account username.
-    git_url=${GIT_URL:-https://github.com}  # github server URL.
-    git_path=$git_url/$github_usr/$pkg_name
-    infomsg "downloading $b$t$git_path$n to $b$t$pkg$n"
-    git clone $branch "$git_path" "$pkg"
+    github_usr=${github_usr:-papamac}             # github account username.
+    github_url=${GITHUB_URL:-https://github.com}  # github server URL.
+    github_usr_url=$github_url/$github_usr
+    github_path=$github_usr_url/$pkg_name
+    infomsg "cloning $m$t$pkg_name from $b$t$github_usr_url$n into $b$t$pkg$n"
+    git clone $branch "$github_path" "$pkg"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
         errmsg "$pkg_name download error ($exit_status)" 'git: '
