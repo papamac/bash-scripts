@@ -137,7 +137,6 @@ usage: p2pkg [-h] | [-y] |
 
 function errmsg { echo "$prefix$r$t$1$n" >&2; }
 function infomsg { echo "$prefix$1"; }
-function echo_exit { echo; exit "$1"; }
 
 function ok_to_continue {
     if [[ -z $yes ]]; then
@@ -145,7 +144,7 @@ function ok_to_continue {
         read -r
         if [[ $REPLY != 'Y' ]]; then
             errmsg 'aborted'
-            echo_exit 1
+            exit 1
         fi
     fi
 }
@@ -166,15 +165,15 @@ function source_action_script {         # Conditionally source package-unique
                 exit_code=$?
                 if [[ $exit_code != 0 ]]; then
                     errmsg "$action_script: exit code $exit_code"
-                    echo_exit 2
+                    exit 2
                 fi
             else
                 errmsg "$action_script: file not found"
-                echo_exit 3
+                exit 3
             fi
         else
             errmsg "$pkg: directory not found"
-            echo_exit 4
+            exit 4
         fi
     fi
 }
@@ -231,11 +230,11 @@ args=$*
 
 if [[ -z $pkg_name ]]; then
     errmsg 'no package specified'
-    echo_exit 6
+    exit 6
 fi
 if [[ -z $cpy$ftp$git$install$option$remove ]]; then
     errmsg 'no options specified'
-    echo_exit 7
+    exit 7
 fi
 
 # Verify operation in the current working directory.
@@ -262,7 +261,7 @@ if [[ -n $cpy ]]; then
     cpy_path=$cpy_lib/$pkg_name
     if [[ ! -d $cpy_path ]]; then
         errmsg "cpy: $cpy_path: library not found"
-        echo_exit 8
+        exit 8
     fi
     infomsg "copying $b$t$cpy_path$n to $b$t$pkg$n"
     mkdir -p "$pkg"
@@ -284,7 +283,7 @@ elif [[ -n $ftp ]]; then
     if [[ $exit_status != 0 ]]; then
         errmsg "wget: $pkg_name: download error ($exit_status)"
         rm -rf "$pkg"
-        echo_exit 9
+        exit 9
     fi
     chown_to_ref "$PWD" "$src"
 
@@ -299,7 +298,7 @@ elif [[ -n $git ]]; then
     if [[ $exit_status != 0 ]]; then
         errmsg "git: $pkg_name: download error ($exit_status)"
         rm -rf "$pkg"
-        echo_exit 10
+        exit 10
     fi
     rm -rf "$pkg"/.[!.]*
     chown_to_ref "$PWD" "$src"
@@ -310,4 +309,4 @@ fi
 export install_arg option_arg remove_arg arg args bin
 source_action_script "$install"
 source_action_script "$option"
-echo_exit 0
+exit 0

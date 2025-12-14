@@ -70,7 +70,7 @@ prefix="$prefix$g${t}remove: $n"
 
 if [[ $HOME == '/root' ]]; then
     errmsg "HOME directory is /root; use sudo -E"
-    echo_exit 11
+    exit 11
 fi
 
 # Remove bash-scripts files and directories from the current working directory.
