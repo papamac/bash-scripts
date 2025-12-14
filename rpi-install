@@ -106,12 +106,11 @@ for pkg in "$@"; do
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
     
         title 'installing ser2sock'
-        cd /usr/local && p2pkg -y -b V1.3.1 -G nutechsoftware ser2sock
+        cd /usr/local
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
             p2pkg -y -gio ser2sock-scripts
             exit_code=$?
-            systemctl -n0 status ser2sockd
         fi
         check 'ser2sock installation error'
     
