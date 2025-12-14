@@ -292,7 +292,7 @@ elif [[ -n $git ]]; then
     github_url=${GITHUB_URL:-https://github.com}  # github server URL.
     github_usr_url=$github_url/$github_usr
     github_path=$github_usr_url/$pkg_name
-    infomsg "cloning $m$t$pkg_name from $b$t$github_usr_url$n into $b$t$pkg$n"
+    infomsg "cloning $m$t$pkg_name$n from $b$t$github_usr_url$n into $b$t$pkg$n"
     git clone $branch "$github_path" "$pkg"
     exit_status=$?
     if [[ $exit_status != 0 ]]; then
