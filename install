@@ -74,8 +74,10 @@
 
 # Define local variables and functions.
 
+prefix=$prefix$g${t}install: $n"
+
 function install {
-    infomsg "$g${t}install:$n installing $g$t$1$n in $b$t$bin$n"
+    infomsg "installing $g$t$1$n in $b$t$bin$n"
     chmod +x "$pkg/$1"
     mkdir -p "$bin"
     chown_to_ref "$PWD" "$bin"
