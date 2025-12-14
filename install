@@ -74,7 +74,7 @@
 
 # Define local variables and functions.
 
-prefix=$prefix$g${t}install: $n"
+prefix="$prefix$g${t}install: $n"
 
 function install {
     infomsg "installing $g$t$1$n in $b$t$bin$n"
@@ -87,7 +87,7 @@ function install {
 # Check for valid HOME directory.
 
 if [[ $HOME == '/root' ]]; then
-    errmsg "install: HOME directory is /root; use sudo -E"
+    errmsg "$g${t}install:$n HOME directory is /root; use sudo -E"
     echo_exit 11
 fi
 
