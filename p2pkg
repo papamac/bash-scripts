@@ -161,6 +161,7 @@ function source_action_script {         # Conditionally source package-unique
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
             if [[ -f $action_script ]]; then
+                prefix="$prefix$g$t$action: $n"
                 source "$action_script"
                 exit_code=$?
                 if [[ $exit_code != 0 ]]; then

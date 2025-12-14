@@ -62,10 +62,6 @@
 #                                                                             #
 ###############################################################################
 
-# Define local variables.
-
-prefix="$prefix$g${t}remove: $n"
-
 # Check for valid HOME directory.
 
 if [[ $HOME == '/root' ]]; then

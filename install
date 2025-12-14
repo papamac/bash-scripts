@@ -72,9 +72,7 @@
 #                                                                             #
 ###############################################################################
 
-# Define local variables and functions.
-
-prefix="$prefix$g${t}install: $n"
+# Define local function.
 
 function install {
     infomsg "installing $g$t$1$n in $b$t$bin$n"
