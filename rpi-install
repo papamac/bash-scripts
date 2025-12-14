@@ -87,25 +87,28 @@ for pkg in "$@"; do
     
     if [[ $pkg == 'all' || $pkg == 'samba' ]]; then  # Install samba for file sharing.
     
-        title "installing $m${t}samba$n"
+        samba_txt=$m${t}samba$n
+        title "installing $samba_txt"
         apt-get update
         apt-get -y install samba samba-common-bin
         exit_code=$?
-        check 'installation error' "$m${t}samba$n"
+        check 'installation error' "$samba_txt "
     
-        title "configuring and restarting $m${t}samba$n"
+        smbd_txt=$c${t}smbd$n
+        title "configuring and restarting $samba_txt"
         sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
         exit_code=$?
-        check 'config editing error' "$m${t}samba$n"
+        check 'config editing error' "$samba_txt "
         systemctl restart smbd
         exit_code=$?
         systemctl -n0 status smbd
-        check 'restart error' "$c${t}smbd$n"
+        check 'restart error' "$smbd_txt "
     fi
     
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
     
-        title "installing $m${t}ser2sock$n"
+        ser2sock_txt=$m${t}ser2sock$n
+        title "installing $ser2sock_txt"
         cd /usr/local
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
@@ -113,13 +116,14 @@ for pkg in "$@"; do
             exit_code=$?
         fi
         systemctl -n0 status ser2sockd
-        check 'installation error' "$m${t}ser2sock$n"
+        check 'installation error' "$ser2sock_txt "
     
-        title "installing $m${t}telnet$n"
+        telnet_txt=$m${t}telnet$n
+        title "installing $telnet_txt"
         apt-get update
-        apt-get -y install telnetx
+        apt-get -y install telnet foo
         exit_code=$?
-        check 'installation error' "$m${t}telnet$n"
+        check 'installation error' "$telnet_txt "
     fi
 done
 
