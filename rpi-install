@@ -4,12 +4,12 @@
 #  PACKAGE:  papamac's bash scripts and runtime environment (bash-scripts)    #
 #     FILE:  rpi-install                                                      #
 #    TITLE:  papamac's Raspberry Pi Installation/Configuration Script         #
-# FUNCTION:  Install and configure rpiOs packages to support the Pi GPIO and  #
+# FUNCTION:  Install and configure rpiOS packages to support the Pi GPIO and  #
 #            other Indigo plugins                                             #
-#    USAGE:  rpi-install [-o]                                                 #
+#    USAGE:  rpi-install [package] | [all]                                                #
 #   AUTHOR:  papamac                                                          #
 #  VERSION:  1.0.1                                                            #
-#     DATE:  December 9, 2025                                                 #
+#     DATE:  December 14, 2025                                                #
 #                                                                             #
 #                                                                             #
 # UNLICENSE:                                                                  #
@@ -70,19 +70,21 @@ for pkg in "$@"; do
         exit_code=$?
         check 'dist-upgrade error'
     
-        title "installing $m${t}avahi-utils$n and $m${t}rgpiod$n"
+        avahi_txt=$$m${t}avahi-utils$n
+        rgpiod_txt=$m${t}rgpiod$n
+        title "installing $avahi_txt and $rgpiod_txt"
         apt-get -y install avahi-utils rgpiod
         exit_code=$?
         check 'package installation error(s)'
     
-        title "configuring and restarting $m${t}rgpiod$n"
+        title "configuring and restarting $rgpiod_txt"
         sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
         exit_code=$?
-        check 'options editing error' "$m${t}rgpiod$n "
+        check 'options editing error' "$rgpiod_txt "
         systemctl restart rgpiod
         exit_code=$?
         systemctl -n0 status rgpiod
-        check 'restart error' "$m${t}rgpiod$n "
+        check 'restart error' "$rgpiod_txt "
     fi
     
     if [[ $pkg == 'all' || $pkg == 'samba' ]]; then  # Install samba for file sharing.
@@ -121,7 +123,7 @@ for pkg in "$@"; do
         telnet_txt=$m${t}telnet$n
         title "installing $telnet_txt"
         apt-get update
-        apt-get -y install telnet foo
+        apt-get -y install telnet
         exit_code=$?
         check 'installation error' "$telnet_txt "
     fi
