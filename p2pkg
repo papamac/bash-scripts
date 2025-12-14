@@ -161,8 +161,10 @@ function source_action_script {         # Conditionally source package-unique
         if [[ -d $pkg ]]; then
             action_script=$pkg/$action
             if [[ -f $action_script ]]; then
+                pfx_save=$prefix
                 prefix="$prefix$g$t$action: $n"
                 source "$action_script"
+                prefix=$pfx_save
                 exit_code=$?
                 if [[ $exit_code != 0 ]]; then
                     errmsg "$action_script: exit code $exit_code"

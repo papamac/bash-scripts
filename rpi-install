@@ -70,55 +70,55 @@ for pkg in "$@"; do
         exit_code=$?
         check 'dist-upgrade error'
     
-        title 'installing avahi-utils and rgpiod'
+        title "installing $m${t}avahi-utils$n and $m${t}rgpiod$n"
         apt-get -y install avahi-utils rgpiod
         exit_code=$?
-        check 'installation error'
+        check 'package installation error(s)'
     
-        title 'configuring and restarting rgpiod'
+        title "configuring and restarting $m${t}rgpiod$n"
         sed -i "/DAEMON/s/-l//" /etc/default/rgpiod
         exit_code=$?
-        check 'rgpiod options editing error'
+        check "$m${t}rgpiod$n $r${t}options editing error"
         systemctl restart rgpiod
         exit_code=$?
         systemctl -n0 status rgpiod
-        check 'rgpiod restart error'
+        check "$m${t}rgpiod$n $r${t}restart error"
     fi
     
     if [[ $pkg == 'all' || $pkg == 'samba' ]]; then  # Install samba for file sharing.
     
-        title 'installing samba'
+        title "installing $m${t}samba$n"
         apt-get update
         apt-get -y install samba samba-common-bin
         exit_code=$?
-        check 'samba installation error'
+        check "$m${t}samba$n $r${t}installation error"
     
-        title 'configuring and restarting samba'
+        title "configuring and restarting $m${t}samba$n"
         sed -i "/homes/,/netlogon/{s/yes/no/;s/= 0700/= 0775/}" /etc/samba/smb.conf
         exit_code=$?
-        check 'samba config editing error'
+        check "$m${t}samba$n $r${t}config editing error"
         systemctl restart smbd
         exit_code=$?
         systemctl -n0 status smbd
-        check 'smbd restart error'
+        check "$c${t}smbd$n $r${t}restart error"
     fi
     
     if [[ $pkg == 'all' || $pkg == 'ser2sock' ]]; then  # Install ser2sock and telnet.
     
-        title 'installing ser2sock'
+        title "installing $m${t}ser2sock$n and $m${t}telnet$n"
         cd /usr/local
         exit_code=$?
         if [[ $exit_code == 0 ]]; then
             p2pkg -y -gio ser2sock-scripts
             exit_code=$?
         fi
-        check 'ser2sock installation error'
+        check "$m${t}ser2sock$n $r${t}installation error"
     
         title 'installing telnet'
         apt-get update
         apt-get -y install telnet
         exit_code=$?
-        check 'telnet installation error'
+        check "$m%{t}telnet$n $r${t}installation error"
     fi
 done
 
