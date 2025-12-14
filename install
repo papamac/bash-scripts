@@ -87,13 +87,13 @@ function install {
 # Check for valid HOME directory.
 
 if [[ $HOME == '/root' ]]; then
-    errmsg "$g${t}install:$n HOME directory is /root; use sudo -E"
+    errmsg "HOME directory is /root; use sudo -E"
     echo_exit 11
 fi
 
 # Install home files and directories.
 
-infomsg "$g${t}install:$n installing .bash_aliases and $b${t}bin$n in $b$t$HOME$n"
+infomsg "installing .bash_aliases and $b${t}bin$n in $b$t$HOME$n"
 cp "$pkg"/bash_aliases ~/.bash_aliases
 chown_to_ref "$HOME" ~/.bash_aliases
 mkdir -p ~/bin
