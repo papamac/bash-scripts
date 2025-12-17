@@ -5,8 +5,8 @@
 #     FILE:  rpi-install                                                      #
 #    TITLE:  papamac's Raspberry Pi Installation/Configuration Script         #
 # FUNCTION:  Install and configure rpiOS packages to support the Pi GPIO and  #
-#            other Indigo plugins                                             #
-#    USAGE:  rpi-install [base] | [samba] | [ser2sock] | [all]                #
+#            AlarmDecoder Bridge Indigo plugins                                             #
+#    USAGE:  rpi-install [[base] [samba] [ser2sock]] | [all] (see below)      #
 #   AUTHOR:  papamac                                                          #
 #  VERSION:  1.0.1                                                            #
 #     DATE:  December 14, 2025                                                #
@@ -39,7 +39,35 @@
 #                                                                             #
 # DESCRIPTION:                                                                #
 #                                                                             #
-# Needs work.                                                                 #
+# rpi-install upgrades and installs packages needed for the Pi GPIO and       #
+# AlarmDecoder Bridge Indigo plugins.  It also installs the samba package for #
+# general file sharing with the Mac.  It has four optional arguments as       #
+# follows:                                                                    #
+#                                                                             #
+# base      Upgrades the rpiOS distribution and installs the rgpio daemon.    #
+#           This is the only installation needed for the Pi GPIO plugin.      #
+# samba     Installs the samba daemon for file sharing.  This is for          #
+#           convenience in working with the Raspberry Pi and is not required  #
+#           for any Indigo functions.                                         #
+# ser2sock  Installs the ser2sock daemon for use by the AlarmDecoder Bridge   #
+#           plugin.                                                           #
+# all       Installs the base, samba, and ser2sock packages using a single    #
+#           argument.                                                         #
+#                                                                             #
+# Usage examples as follows:                                                  #
+#                                                                             #
+# sudo rpi-install base               # Upgrade/install packages for Pi GPIO  #
+#                                                                             #
+# sudo rpi_install base ser2sock      # Install base and ser2sock packages.   #
+#                                                                             #
+# sudo rpi_install all                # Install all packages; equivalent to   #
+# sudo rpi_install base samba ser2sock                                        #
+#                                                                             #
+#                                                                             #
+# DEPENDENCIES/LIMITATIONS:                                                   #
+#                                                                             #
+# Because it changes files and directories owned by root, rpi-install must be #
+# executed using sudo.                                                        #
 #                                                                             #
 ###############################################################################
 
@@ -70,7 +98,7 @@ for pkg in "$@"; do
         exit_code=$?
         check 'dist-upgrade error'
     
-        avahi_txt=$$m${t}avahi-utils$n
+        avahi_txt=$m${t}avahi-utils$n
         rgpiod_txt=$m${t}rgpiod$n
         title "installing $avahi_txt and $rgpiod_txt"
         apt-get -y install avahi-utils rgpiod

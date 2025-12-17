@@ -47,8 +47,9 @@
 
 # Define local variables and functions.
 
-script=${0##*/}                       # Script name.
-prefix="$g$t$script:$n "              # Message prefix.
+script=${0##*/}                         # Script name.
+prefix="$prefix$g$t$script:$n "         # Message prefix.
+export prefix
 
 usage="mdns [-h | -?]                     Display this help.
 mdns -a [host address]             Resolve host address to mDNS hostname.

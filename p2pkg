@@ -122,7 +122,7 @@ fi
 # Define local variables and functions.
 
 script=${0##*/}                         # Script name.
-prefix="$prefix$g$t$script: $n"         # Message prefix.
+prefix="$prefix$g$t$script:$n "         # Message prefix.
 export prefix
 
 usage="\
